@@ -90,8 +90,10 @@ def construct_A_b(h: np.array, c: float, d: float, M: int) -> Tuple[np.array, np
 
 
 def plot_solution(u_hat, u, x):
-    plt.plot(x, u_hat)
-    plt.plot(x, u)
+    plt.plot(x, u, label="$u(x)$")
+    plt.plot(x, u_hat, ':', label="$\hat{u}(x)$")
+    plt.legend()
+    plt.title('Interpolated vs true $u(x)$.')
     plt.show()
 
 
