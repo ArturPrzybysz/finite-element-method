@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="cholesky"):
     """
     Solves 1D bounded value problem.
-    Authors: Artur Przybysz, Elona Mongelli, Ivan Knezevic
+    Authors: Artur Przybysz, Elena Mongelli, Ivan Knezevic
 
     Inputs parameters:
     :param L: float, Domain length

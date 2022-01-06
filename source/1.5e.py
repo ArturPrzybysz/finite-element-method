@@ -24,7 +24,7 @@ def BVP1D(L: float, c: float, d: float, psi: float, epsilon: float, M: int = Non
           solver="cholesky", use_sparse=False):
     """
     Solves 1D bounded value problem.
-    Authors: Artur Przybysz, Elona Mongelli, Ivan Knezevic
+    Authors: Artur Przybysz, Elena Mongelli, Ivan Knezevic
 
     Inputs parameters:
     :param L: float, Domain length
