@@ -88,13 +88,28 @@ def refine_marked(EtoV, VX, idxMarked):
 
 def refine_until_converged(VX, EtoV, fun, tolerance):
     L2_loss = compute_error_decrease(fun, VX, EtoV)
+    plot_errors(L2_loss, tolerance, title="Errors before convergence")
+
     step = 0
     while max(L2_loss.values()) >= tolerance:
         marked_idx = [k for k, v in sorted(L2_loss.items(), key=lambda t: t[1])[-1:]]
         EToV, VX = refine_marked(EtoV, VX, marked_idx)
         L2_loss = compute_error_decrease(u_function, VX, EtoV)
         step += 1
+    plot_errors(L2_loss, tolerance, title="Errors after convergence")
     return VX, EtoV
+
+
+def plot_errors(L2_loss, tol, title):
+    plt.axhline(y=tol, color='r', linestyle='-')
+    plt.title(title)
+    plt.xlabel("Id of element")
+    plt.ylabel("L2 error value")
+    y = [v for v in L2_loss.values()]
+    x = [v for v in L2_loss.keys()]
+    plt.xticks(x)
+    plt.scatter(x, y)
+    plt.show()
 
 
 def main():
@@ -111,7 +126,7 @@ def main():
         are used for initialization, this area is 'explored' more than the right local maximum.  
         Show it on examples.
     """
-    mesh = np.linspace(start=0, stop=1, num=2)
+    mesh = np.linspace(start=0, stop=1, num=4)
     u_hat = u_function(mesh)
 
     x = np.linspace(start=0, stop=1, num=500)
