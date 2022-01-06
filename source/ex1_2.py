@@ -20,7 +20,7 @@ import scipy.linalg
 import matplotlib.pyplot as plt
 
 
-def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="cholesky", use_sparse=False):
+def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="cholesky"):
     """
     Solves 1D bounded value problem.
     Authors: Artur Przybysz, Elona Mongelli, Ivan Knezevic
@@ -32,9 +32,6 @@ def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solve
     :param M: int: mesh size
     :param x: np.array: 1D mesh vector x(1:{M})
     :param solver: which solver to use ("cholesky", "default")
-    :param use_sparse: bool, whether to use sparse matrices or not
-
-
 
     :return: u, which is an approximate of solution function
     """
@@ -89,9 +86,10 @@ def construct_A_b(h: np.array, c: float, d: float, M: int) -> Tuple[np.array, np
     return A, b
 
 
-def plot_solution(u_hat, u, x):
+def plot_solution(u_hat, u, x, mesh):
     plt.plot(x, u, label="$u(x)$")
     plt.plot(x, u_hat, ':', label="$\hat{u}(x)$")
+    plt.scatter(mesh, np.zeros_like(mesh))
     plt.legend()
     plt.title('Interpolated vs true $u(x)$.')
     plt.show()
@@ -118,7 +116,7 @@ def plot_difference(u_hat, u, x):
 
 
 def interpolate(u_hat, mesh, x):
-    w = np.empty_like(x)
+    w = np.zeros_like(x)
 
     mesh_id = 0
     for i, x_i in enumerate(x):
@@ -130,8 +128,8 @@ def interpolate(u_hat, mesh, x):
 
         u1 = u_hat[mesh_id]
         u2 = u_hat[mesh_id + 1]
-
-        w[i] = (weight2 * u1 + weight1 * u2) / (weight1 + weight2)
+        value = (weight2 * u1 + weight1 * u2) / (weight1 + weight2)
+        w[i] = value
 
     return w
 
@@ -147,7 +145,7 @@ def main():
     u = u_function(x, a=1, b=0)
     w = interpolate(u_hat, mesh, x)
 
-    plot_solution(w, u, x)
+    plot_solution(w, u, x, mesh)
     plot_difference(w, u, x)
     C = validate(w, u, h)
     print("C=", C)
