@@ -103,7 +103,11 @@ def plot_errors(L2_loss, tol, title):
     plt.ylabel("L2 error value")
     y = [v for v in L2_loss.values()]
     x = [v for v in L2_loss.keys()]
-    plt.xticks(x)
+    if len(x) > 10:
+        plt.xticks(x[::5])
+    else:
+        plt.xticks(x)
+
     plt.scatter(x, y)
     plt.yscale("log")
     plt.show()
@@ -124,8 +128,7 @@ def main():
         Show it on examples.
     """
 
-
-    mesh = np.linspace(start=0, stop=1, num=4)
+    mesh = np.linspace(start=0, stop=1, num=3)
     u_hat = u_function(mesh)
 
     x = np.linspace(start=0, stop=1, num=500)
@@ -140,7 +143,10 @@ def main():
     mesh2 = np.array(list(sorted([v for v in VX.values()])))
     u_hat = interpolate(u_function(mesh2), mesh2, x)
     plot_solution(u_hat, u_x, x, mesh2)
-
+    plt.hist(mesh2, bins=21, density=True, label="mesh bounds histogram")
+    plt.plot(x, u_x, label="$u(x)$")
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     main()

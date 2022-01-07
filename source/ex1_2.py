@@ -89,7 +89,7 @@ def construct_A_b(h: np.array, c: float, d: float, M: int) -> Tuple[np.array, np
 def plot_solution(u_hat, u, x, mesh):
     plt.plot(x, u, label="$u(x)$")
     plt.plot(x, u_hat, ':', label="$\hat{u}(x)$")
-    plt.scatter(mesh, np.zeros_like(mesh) - 0.05, marker="x")
+    plt.scatter(mesh, np.zeros_like(mesh) - 0.05, marker="|", s=5)
     plt.legend()
     plt.title('Interpolated vs true $u(x)$.')
     plt.show()
@@ -158,7 +158,7 @@ def exercise_1_2c():
     x = np.linspace(start=0, stop=2, num=1000)
     u = u_function(x, a=1, b=0)
     # Part i)
-    mesh_i = np.array([0, 2 / 3, 2])
+    mesh_i = np.array([0, 4 / 3, 2])
     u_hat_i, _, _ = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_i)
     w_i = interpolate(u_hat_i, mesh_i, x)
     plot_solution(w_i, u, x, mesh_i)
