@@ -1,3 +1,6 @@
+"""
+    Authors: Artur Przybysz (s202384), Elena Mongelli(s181214), Ivan Knezevic (s202386)
+"""
 from typing import Dict
 
 import numpy as np

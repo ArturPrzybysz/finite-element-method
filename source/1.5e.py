@@ -1,4 +1,7 @@
 """
+    Authors: Artur Przybysz (s202384), Elena Mongelli(s181214), Ivan Knezevic (s202386)
+"""
+"""
 Exercise 1.2
 The goal of this exercise is to write your first FEM procedure for solving a boundary value
 problem in one dimension. This requires that some algorithms of Chapter 1 are implemented.
@@ -19,7 +22,7 @@ import numpy as np
 import scipy.linalg
 import matplotlib.pyplot as plt
 
-from source.ex1_2 import plot_solution
+from source.ex1_2 import plot_solution, validate
 
 
 def BVP1D(L: float, c: float, d: float, psi: float, epsilon: float, M: int = None, x: np.array = None,
@@ -96,12 +99,6 @@ def construct_A_b(h: np.array, c: float, d: float, psi: float, epsilon: float, M
     return A, b
     """
 
-def validate(u_hat, u, h):
-    """
-    Uses formula (1.33) to compute error.
-    """
-    C = max(u_hat - u) / max(h) ** 2
-    return C
 
 
 def u_function(x, psi=1.0, epsilon=1.0):

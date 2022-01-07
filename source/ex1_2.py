@@ -1,4 +1,8 @@
 """
+    Authors: Artur Przybysz (s202384), Elena Mongelli(s181214), Ivan Knezevic (s202386)
+"""
+
+"""
 Exercise 1.2
 The goal of this exercise is to write your first FEM procedure for solving a boundary value
 problem in one dimension. This requires that some algorithms of Chapter 1 are implemented.
@@ -23,7 +27,7 @@ import matplotlib.pyplot as plt
 def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="default"):
     """
     Solves 1D bounded value problem.
-    Authors: Artur Przybysz, Elena Mongelli, Ivan Knezevic
+    Authors: Artur Przybysz (s202384), Elena Mongelli(s181214), Ivan Knezevic (s202386)
 
     Inputs parameters:
     :param L: float, Domain length
@@ -159,15 +163,19 @@ def exercise_1_2c():
     u = u_function(x, a=1, b=0)
     # Part i)
     mesh_i = np.array([0, 4 / 3, 2])
-    u_hat_i, _, _ = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_i)
+    u_hat_i, _, h_i = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_i)
     w_i = interpolate(u_hat_i, mesh_i, x)
     plot_solution(w_i, u, x, mesh_i)
 
     # Part ii)
     mesh_ii = np.array([0, 1, 2])
-    u_hat_ii, _, _ = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_ii)
+    u_hat_ii, _, h_ii = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_ii)
     w_ii = interpolate(u_hat_ii, mesh_ii, x)
     plot_solution(w_ii, u, x, mesh_ii)
+
+    C_i = validate(w_i, u, h_i)
+    C_ii = validate(w_ii, u, h_ii)
+    print(C_i, C_ii)
 
 
 def main():
