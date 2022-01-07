@@ -28,7 +28,7 @@ def compute_L2_error(length, slope1, slope2):
     :param slope2:
     :return:
     """
-    return length ** 3 * np.abs(slope2 - slope1) * 1 / 3
+    return length ** 3 * np.abs(slope2 - slope1) ** 2 * 1 / 3
 
 
 def compute_error_decrease(fun, VX, EToV) -> Dict[int, float]:
@@ -49,18 +49,12 @@ def compute_error_decrease(fun, VX, EToV) -> Dict[int, float]:
         y_half = fun(x_half)
 
         slope0 = (y2 - y1) / (x2 - x1)
-
-        # P1 = np.array([x1, y1])
-        # P2 = np.array([x2, y2])
-        # P_half = np.array([x_half, y_half])
-        # P_half_lower = np.array([x_half, y1 + (x_half - x1) * slope0])
-
         slope1 = (y_half - y1) / (x_half - x1)
         slope2 = (y2 - y_half) / (x2 - x_half)
 
         L2_loss1 = compute_L2_error(x_half - x1, slope0, slope1)
         L2_loss2 = compute_L2_error(x_half - x1, slope0, slope2)
-        L2_loss[e] = L2_loss1 + L2_loss2
+        L2_loss[e] = np.sqrt(L2_loss1 + L2_loss2)
 
     return L2_loss
 
@@ -129,7 +123,9 @@ def main():
         are used for initialization, this area is 'explored' more than the right local maximum.  
         Show it on examples.
     """
-    mesh = np.linspace(start=0, stop=1, num=3)
+
+
+    mesh = np.linspace(start=0, stop=1, num=4)
     u_hat = u_function(mesh)
 
     x = np.linspace(start=0, stop=1, num=500)

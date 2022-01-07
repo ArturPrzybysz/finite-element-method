@@ -20,7 +20,7 @@ import scipy.linalg
 import matplotlib.pyplot as plt
 
 
-def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="cholesky"):
+def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solver="default"):
     """
     Solves 1D bounded value problem.
     Authors: Artur Przybysz, Elena Mongelli, Ivan Knezevic
@@ -40,7 +40,7 @@ def BVP1D(L: float, c: float, d: float, M: int = None, x: np.array = None, solve
     if x is None and M is not None:
         x = np.linspace(0, L, num=M)
     elif x is not None:
-        pass
+        M = len(x)
     else:
         raise ValueError("Either M or x must be filled, but neither is given.")
 
@@ -81,7 +81,7 @@ def construct_A_b(h: np.array, c: float, d: float, M: int) -> Tuple[np.array, np
 
     b[0] = c
     b[1] = -K[0, 1, 0] * c
-    b[size - 2] = -K[len(K) - 1, 0, 1] * d
+    b[size - 2] += -K[len(K) - 1, 0, 1] * d
     b[size - 1] = d
     return A, b
 
@@ -89,7 +89,7 @@ def construct_A_b(h: np.array, c: float, d: float, M: int) -> Tuple[np.array, np
 def plot_solution(u_hat, u, x, mesh):
     plt.plot(x, u, label="$u(x)$")
     plt.plot(x, u_hat, ':', label="$\hat{u}(x)$")
-    plt.scatter(mesh, np.zeros_like(mesh)-0.05, marker="x")
+    plt.scatter(mesh, np.zeros_like(mesh) - 0.05, marker="x")
     plt.legend()
     plt.title('Interpolated vs true $u(x)$.')
     plt.show()
@@ -134,11 +134,11 @@ def interpolate(u_hat, mesh, x):
     return w
 
 
-def main():
+def general_example():
     L = 2
     c = 1
     d = np.exp(2)
-    M = 12
+    M = 4
 
     u_hat, mesh, h = BVP1D(L, c, d, M)
     x = np.linspace(start=min(mesh), stop=max(mesh), num=1000)
@@ -149,6 +149,30 @@ def main():
     plot_difference(w, u, x)
     C = validate(w, u, h)
     print("C=", C)
+
+
+def exercise_1_2c():
+    """
+    In this function we compare the outputs of the procedure with the ones we got computing it "by hand".
+    """
+    x = np.linspace(start=0, stop=2, num=1000)
+    u = u_function(x, a=1, b=0)
+    # Part i)
+    mesh_i = np.array([0, 2 / 3, 2])
+    u_hat_i, _, _ = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_i)
+    w_i = interpolate(u_hat_i, mesh_i, x)
+    plot_solution(w_i, u, x, mesh_i)
+
+    # Part ii)
+    mesh_ii = np.array([0, 1, 2])
+    u_hat_ii, _, _ = BVP1D(L=2, c=1, d=np.exp(2), x=mesh_ii)
+    w_ii = interpolate(u_hat_ii, mesh_ii, x)
+    plot_solution(w_ii, u, x, mesh_ii)
+
+
+def main():
+    # general_example()
+    exercise_1_2c()
 
 
 if __name__ == '__main__':
