@@ -18,17 +18,15 @@ def point_on_line(p1, p2, p3):
     return projection
 
 
-def compute_L2_error(base_length, height):
+def compute_L2_error(length, slope1, slope2):
     """
-    Computes area of a squared
-    :param base_length: float, length of a base of a triangle
-    :param height: float, height of a triangle 
-    :return: area under parabola: y = ax^2 in range [0, base_length]
+    Computes integral of (a_1 * x - a_2 * x)^2 over [0, length]
+    :param length:
+    :param slope1:
+    :param slope2:
+    :return:
     """
-    if np.isclose(height, 0): return 0
-    if np.isclose(base_length, 0): return 0
-    a = height ** 2 / base_length ** 2
-    return a / 3 * base_length ** 3
+    return length ** 3 * np.abs(slope2 - slope1) * 1 / 3
 
 
 def compute_error_decrease(fun, VX, EToV) -> np.array:
@@ -43,22 +41,23 @@ def compute_error_decrease(fun, VX, EToV) -> np.array:
     for e, (idx1, idx2) in EToV.items():
         x1 = VX[idx1]
         x2 = VX[idx2]
-        y1 = fun(x1)
-        y2 = fun(x2)
+        y1 = fun(x1)  # This line should be updated in 1.7
+        y2 = fun(x2)  # This line should be updated in 1.7
         x_half = (x1 + x2) / 2
         y_half = fun(x_half)
 
-        P1 = np.array([x1, y1])
-        P2 = np.array([x2, y2])
-        P_half = np.array([x_half, y_half])
-        P_projected = point_on_line(P1, P2, P_half)
+        slope0 = (y2 - y1) / (x2 - x1)
 
-        triangle_height = np.sqrt(np.sum((P_projected - P_half) ** 2))
-        base_len1 = np.sqrt(np.sum((P_projected - P1) ** 2))
-        base_len2 = np.sqrt(np.sum((P_projected - P2) ** 2))
+        # P1 = np.array([x1, y1])
+        # P2 = np.array([x2, y2])
+        # P_half = np.array([x_half, y_half])
+        # P_half_lower = np.array([x_half, y1 + (x_half - x1) * slope0])
 
-        L2_loss1 = compute_L2_error(base_len1, triangle_height)
-        L2_loss2 = compute_L2_error(base_len2, triangle_height)
+        slope1 = (y_half - y1) / (x_half - x1)
+        slope2 = (y2 - y_half) / (x2 - x_half)
+
+        L2_loss1 = compute_L2_error(x_half - x1, slope0, slope1)
+        L2_loss2 = compute_L2_error(x_half - x1, slope0, slope2)
         L2_loss[e] = L2_loss1 + L2_loss2
 
     return L2_loss
@@ -101,6 +100,7 @@ def refine_until_converged(VX, EtoV, fun, tolerance):
 
 
 def plot_errors(L2_loss, tol, title):
+    # TODO: log scale for y!
     plt.axhline(y=tol, color='r', linestyle='-')
     plt.title(title)
     plt.xlabel("Id of element")
@@ -109,6 +109,7 @@ def plot_errors(L2_loss, tol, title):
     x = [v for v in L2_loss.keys()]
     plt.xticks(x)
     plt.scatter(x, y)
+    plt.yscale("log")
     plt.show()
 
 
@@ -126,7 +127,7 @@ def main():
         are used for initialization, this area is 'explored' more than the right local maximum.  
         Show it on examples.
     """
-    mesh = np.linspace(start=0, stop=1, num=4)
+    mesh = np.linspace(start=0, stop=1, num=3)
     u_hat = u_function(mesh)
 
     x = np.linspace(start=0, stop=1, num=500)
@@ -137,7 +138,7 @@ def main():
     VX = {i: x_i for i, x_i in enumerate(mesh)}
     EtoV = {n: (n, n + 1) for n in range(len(mesh) - 1)}
 
-    VX, EtoV = refine_until_converged(VX, EtoV, u_function, tolerance=0.00001)
+    VX, EtoV = refine_until_converged(VX, EtoV, u_function, tolerance=0.0001)
     mesh2 = np.array(list(sorted([v for v in VX.values()])))
     u_hat = interpolate(u_function(mesh2), mesh2, x)
     plot_solution(u_hat, u_x, x, mesh2)

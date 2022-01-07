@@ -19,6 +19,8 @@ import numpy as np
 import scipy.linalg
 import matplotlib.pyplot as plt
 
+from source.ex1_2 import plot_solution
+
 
 def BVP1D(L: float, c: float, d: float, psi: float, epsilon: float, M: int = None, x: np.array = None,
           solver="cholesky", use_sparse=False):
@@ -53,7 +55,6 @@ def BVP1D(L: float, c: float, d: float, psi: float, epsilon: float, M: int = Non
 
     A, b = construct_A_b(h, c, d, M=M, psi=psi, epsilon=epsilon)
     if solver == "cholesky":
-        # L = np.linalg.cholesky(A)
         c, low = scipy.linalg.cho_factor(A)
         u_hat = scipy.linalg.cho_solve((c, low), b)
     else:
@@ -91,14 +92,6 @@ def construct_A_b(h: np.array, c: float, d: float, psi: float, epsilon: float, M
     return A, b
 
 
-def plot_solution(u_hat, u, x):
-    plt.plot(x, u, label="$u(x)$")
-    plt.plot(x, u_hat, ':', label="$\hat{u}(x)$")
-    plt.legend()
-    plt.title('Interpolated vs true $u(x)$.')
-    plt.show()
-
-
 def validate(u_hat, u, h):
     """
     Uses formula (1.33) to compute error.
@@ -107,8 +100,9 @@ def validate(u_hat, u, h):
     return C
 
 
-def u_function(x, psi=1.0, ep=1.0):
-    y = 1 / psi * (1 / (-1 + np.exp(psi / ep) - 1) - np.exp(x * psi / ep) / (-1 + np.exp(psi / ep)) + x)
+def u_function(x, psi=1.0, epsilon=1.0):
+    a = psi / epsilon
+    y = 1 / psi * ((np.exp(-a) + (x - x * np.exp(-a)) - np.exp(psi * (x - 1) / epsilon)) / (1 - np.exp(-a)))
     return y
 
 
@@ -142,15 +136,15 @@ def main():
     L = 1
     c = 0
     d = 0
-    M = 5
+    M = 10
     psi = 1
     epsilon = 1
-    u_hat, mesh, h = BVP1D(L, c, d, psi, epsilon=epsilon, M=M)
+    u_hat, mesh, h = BVP1D(L, c, d, psi, epsilon=epsilon, M=M, solver="default")
     x = np.linspace(start=min(mesh), stop=max(mesh), num=1000)
-    u = u_function(x, psi=psi, ep=epsilon)
+    u = u_function(x, psi=psi, epsilon=epsilon)
     w = interpolate(u_hat, mesh, x)
 
-    plot_solution(w, u, x)
+    plot_solution(w, u, x, mesh)
     plot_difference(w, u, x)
     C = validate(w, u, h)
     print("C=", C)
