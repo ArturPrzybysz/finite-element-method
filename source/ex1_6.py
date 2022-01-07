@@ -1,3 +1,5 @@
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,7 +31,7 @@ def compute_L2_error(length, slope1, slope2):
     return length ** 3 * np.abs(slope2 - slope1) * 1 / 3
 
 
-def compute_error_decrease(fun, VX, EToV) -> np.array:
+def compute_error_decrease(fun, VX, EToV) -> Dict[int, float]:
     """
     Computes estimate of possible error decrease for each element in mesh.
 
