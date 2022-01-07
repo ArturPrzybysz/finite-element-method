@@ -84,13 +84,17 @@ def construct_A_b(h: np.array, c: float, d: float, psi: float, epsilon: float, M
             A[i, i - 1] = K[i - 1, 1, 0]
         if i != M - 2:
             A[i, i + 1] = K[i, 0, 1]
-
+    b[0] = c
+    b[size - 1] = d
+    for i in range(1, size - 1):
+        b[i] = h[i] * 2
+    """
     b[0] = c
     b[1] = -K[0, 1, 0] * c
     b[size - 2] = -K[len(K) - 1, 0, 1] * d
     b[size - 1] = d
     return A, b
-
+    """
 
 def validate(u_hat, u, h):
     """
