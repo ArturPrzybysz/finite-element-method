@@ -22,7 +22,6 @@ def xy(x0, y0, L1, L2, noelms1, noelms2):
 
 
 def construct_element_table(element_count1: int, element_count2: int):
-    element_count_all = 2 * element_count1 * element_count2
     etov_dict = dict()
 
     triangle_to_count = {"upper": 1, "lower": 2}
@@ -48,7 +47,7 @@ def main():
     """Test case:
     (x_0 , y_0 ) = (−2.5, −4.8), L_1 = 7.6, L_2 = 5.9, noelms1 = 4, noelms2 = 3
     """
-    X, Y = xy(-2.5, -4.8, 7.6, 5.9, 4, 3)
+    VX, VY = xy(-2.5, -4.8, 7.6, 5.9, 4, 3)
     etov_dict = construct_element_table(4, 3)
     print()
 
