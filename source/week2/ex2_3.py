@@ -20,21 +20,25 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M):
         TODO: explanation
     """
     N = len(EToV)
+    iL = np.zeros(3 * 3 * N)
+    jL = np.zeros(3 * 3 * N)
+    sL = np.zeros(3 * 3 * N)
+    count = 0
     A = np.zeros((M, M))
     b = np.zeros(M)
     for n in range(1, N + 1):
-        i, j, k = EToV[n]
-        i -= 1
-        j -= 1
-        k -= 1
-
-        q = qt[n]
+        # q = qt[n]
         abc, delta = basfun(n, VX, VY, EToV)
-
         for r in range(3):
-            b[i] += q * np.abs(delta) / 3
+            i = EToV[n][r] - 1
+            qr = qt[n]
+            b[i] += qr
             for s in range(3):
+                j = EToV[n][s] - 1
                 k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)
+                iL[count] = i
+                jL[count] = j
+                sL[count] = k_rsn
                 A[i, j] += k_rsn
     return A, b  # TODO: make sure A is sparse
 
@@ -66,8 +70,8 @@ def construct_qt(etov_dict, VX, VY, test_case=None):
 
 
 def main():
-    X, Y = xy(x0=0, y0=0, L1=1, L2=1, noelms1=4, noelms2=4)
-    etov_dict, M = construct_element_table(4, 4)
+    X, Y = xy(x0=0, y0=0, L1=1, L2=1, noelms1=4, noelms2=3)
+    etov_dict, M = construct_element_table(4, 3)
     # TODO: get lambda value
     lam1 = 1
     lam2 = 1
