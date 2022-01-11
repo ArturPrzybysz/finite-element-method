@@ -13,8 +13,6 @@ def xy(x0, y0, L1, L2, noelms1, noelms2):
         start_idx = i * (noelms2 + 1)
         stop_idx = start_idx + (noelms2 + 1)
         X[start_idx:stop_idx] = x
-    # for j, y in np.linspace(start=y0, stop=x0 + L1, num=noelms1):
-    #     X[i:(i*noelms2)] = x
 
     first_row = np.linspace(start=y0, stop=y0 + L2, num=noelms2 + 1)[::-1]
     Y = np.tile(first_row, noelms1 + 1)
@@ -40,7 +38,8 @@ def construct_element_table(element_count1: int, element_count2: int):
                     v3 = 1 + (e1 * (element_count2 + 1)) + e2
                     v2 = v3 + element_count2 + 2
                 etov_dict[e] = (v1, v2, v3)
-    return etov_dict
+    M = (element_count1 + 1) * (element_count2 + 1)
+    return etov_dict, M
 
 
 def main():
