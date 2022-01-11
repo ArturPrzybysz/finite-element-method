@@ -11,13 +11,13 @@ def compute_k_rsn(abc, delta, r, s, lam1, lam2):
     bs = abc[s, 1]
     cr = abc[r, 2]
     cs = abc[s, 2]
-    k_rsn = 1 / (delta * 4) * (lam1 * br * bs + lam2 * cr * cs)
+    k_rsn = (lam1 * br * bs + lam2 * cr * cs) / np.abs(delta * 4)
     return k_rsn
 
 
 def assembly(VX, VY, EToV, lam1, lam2, qt, M):
     """
-        TODO
+        TODO: explanation
     """
     N = len(EToV)
     A = np.zeros((M, M))
@@ -32,27 +32,36 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M):
         abc, delta = basfun(n, VX, VY, EToV)
 
         for r in range(3):
-            b[i] += q[r]
+            b[i] += q * np.abs(delta) / 3
             for s in range(3):
                 k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)
                 A[i, j] += k_rsn
     return A, b  # TODO: make sure A is sparse
 
 
-def construct_qt(etov_dict, VX, VY):
+def construct_qt(etov_dict, VX, VY, test_case=None):
     """
     Computes points as means of each elements' vertices.
     """
     qt_dict = dict()
     for e, (v1, v2, v3) in etov_dict.items():
-        x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
-        y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
+        if test_case == 1:
+            qt_dict[e] = 0
+        elif test_case == 2:
+            x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
+            y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
 
-        mean_1 = np.mean([x1, y1])
-        mean_2 = np.mean([x2, y2])
-        mean_3 = np.mean([x3, y3])
+            def f(x, y):
+                return -6 * x + 2 * y - 2
 
-        qt_dict[e] = (mean_1, mean_2, mean_3)
+            q1 = f(x1, y1)
+            q2 = f(x2, y2)
+            q3 = f(x3, y3)
+
+            q_avg = np.mean([q1, q2, q3])
+            qt_dict[e] = q_avg
+        else:
+            raise Exception("Unknown test case")
     return qt_dict
 
 
@@ -62,7 +71,7 @@ def main():
     # TODO: get lambda value
     lam1 = 1
     lam2 = 1
-    qt = construct_qt(etov_dict, X, Y)
+    qt = construct_qt(etov_dict, X, Y, test_case=1)
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     # B, d = spdiags(A)
     print()
