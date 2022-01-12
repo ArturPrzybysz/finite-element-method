@@ -5,11 +5,10 @@ from source.week2.ex2_4 import boundary_conditions
 import matplotlib.pyplot as plt
 
 
-def u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, test_case):
+def u_hat(X, Y, L1, L2, x0, y0, M, A, b, test_case):
     # we have f=u, to get q we need to solve q(x,y)=-(u_(xx)+u_(yy))
     # u_hat --> Au=b
-
-    A, b = boundary_conditions(X, Y, etov_dict, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case)
+    A, b = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case, exercise="2_5")
     print("A:", A)
     uhat = np.linalg.solve(A, b)
     return uhat
@@ -46,7 +45,7 @@ def construct_qt(etov_dict, VX, VY, test_case=None):
             y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
 
             def f(x, y):
-                return -4
+                return -2 * y ** 2 - 2 * x ** 2
 
             q1 = f(x1, y1)
             q2 = f(x2, y2)
@@ -99,7 +98,7 @@ def main():
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    uhat = u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, ntest_case)
+    uhat = u_hat(X, Y, L1, L2, x0, y0, M, A, b, ntest_case)
     print("u_hat", uhat)
     u1 = u(X, Y, ntest_case)
     print("u1", u1)
