@@ -69,13 +69,29 @@ def construct_qt(etov_dict, VX, VY, test_case=None):
     return qt_dict
 
 
+def test_case_data(nr_of_test_case):
+    if nr_of_test_case == 1:
+        X, Y = xy(x0=0, y0=0, L1=1, L2=1, noelms1=4, noelms2=3)
+        etov, M = construct_element_table(4, 3)
+        # TODO: get lambda value
+        lam1 = 1
+        lam2 = 1
+        qt = construct_qt(etov, X, Y, test_case=2)
+        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
+    elif nr_of_test_case == 2:
+        X, Y = xy(x0=-2.5, y0=-4.8, L1=7.6, L2=5.9, noelms1=4, noelms2=3)
+        etov, M = construct_element_table(4, 3)
+        # TODO: get lambda value
+        lam1 = 1
+        lam2 = 1
+        qt = construct_qt(etov, X, Y, test_case=2)
+
+        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
+    else:
+        raise Exception("Unknown test case")
+
 def main():
-    X, Y = xy(x0=0, y0=0, L1=1, L2=1, noelms1=4, noelms2=3)
-    etov_dict, M = construct_element_table(4, 3)
-    # TODO: get lambda value
-    lam1 = 1
-    lam2 = 1
-    qt = construct_qt(etov_dict, X, Y, test_case=1)
+    nr_of_test_case, X, Y, etov_dict, M, lam1, lam2, qt = test_case_data(2)
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     # B, d = spdiags(A)
     print()
