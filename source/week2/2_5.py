@@ -10,7 +10,7 @@ def u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, test_case):
     # u_hat --> Au=b
 
     A, b = boundary_conditions(X, Y, etov_dict, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case)
-    print("A:",A)
+    print("A:", A)
     uhat = np.linalg.solve(A, b)
     return uhat
 
@@ -87,19 +87,24 @@ def test_case_data(nr_of_test_case):
         raise Exception("Unknown test case")
 
 
+def max_error(u,u_hat,M):
+    errors=[]
+    for i in range(M):
+        errors.append(abs(u[i]-u_hat[i]))
+    return max(errors)
+
+
 def main():
     ntest_case = 1
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    uhat=u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, ntest_case)
-    print(uhat)
-
-    #x = np.linspace(x0, L1 + x0, 0.1)
-    #y = np.linspace(y0, L2 + y0, 0.1)
-    #u_1 = u(x, y, 1)
-    #print(u_1)
-
+    uhat = u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, ntest_case)
+    print("u_hat", uhat)
+    u1 = u(X, Y, ntest_case)
+    print("u1", u1)
+    error=max_error(u1,uhat,M)
+    print(error)
 
 if __name__ == '__main__':
     main()
