@@ -3,7 +3,7 @@ import numpy as np
 from source.week2.ex2_1 import xy, construct_element_table
 from source.week2.ex2_2a import basfun
 
-from scipy.sparse import spdiags, diags
+from scipy.sparse import dia_matrix
 
 
 def compute_k_rsn(abc, delta, r, s, lam1, lam2):
@@ -90,10 +90,32 @@ def test_case_data(nr_of_test_case):
     else:
         raise Exception("Unknown test case")
 
+
+def sparse_diags(A):
+    # x = dia_matrix(A)
+    max_diag_size = A.diagonal(0).shape[0]
+    d = []
+    data = []
+    for diag in range(-A.shape[0], A.shape[1]):
+        diag_value = A.diagonal(diag)
+        if np.any(diag_value):
+            d.append(diag)
+
+            if diag > 0:
+                x = np.zeros(max_diag_size)
+                x[diag:] = diag_value
+                diag_value = x
+            data.append(diag_value)
+
+    d = np.array(d)
+    B = np.zeros((len(d), max_diag_size))
+    return B, d
+
+
 def main():
     nr_of_test_case, X, Y, etov_dict, M, lam1, lam2, qt = test_case_data(2)
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    # B, d = spdiags(A)
+    B, d = sparse_diags(A)
     print()
 
 
