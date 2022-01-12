@@ -36,7 +36,6 @@ def boundary_conditions(X, Y, EToV, L1, L2, x0, y0, M, A, b, test_case = None):
                 if(j != i):
                     A[i,j] = 0
                     if ( 0 < X[j] < L1 ) and (0 < Y[j] < L2):
-                        print("j, i", j, i)
                         b[j] -= A[j,i] * b[i]
                         A[j, i] = 0
                     

@@ -2,7 +2,61 @@ import numpy as np
 from source.week2.ex2_1 import construct_element_table, xy
 from source.week2.ex2_3 import assembly, construct_qt
 from source.week2.ex2_4 import boundary_conditions
+import matplotlib as plt
 
+
+def u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, test_case):
+    # we have f=u, to get q we need to solve q(x,y)=-(u_(xx)+u_(yy))
+    # u_hat --> Au=b
+
+    A, b = boundary_conditions(X, Y, etov_dict, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case)
+    print("A:",A)
+    uhat = np.linalg.solve(A, b)
+    return uhat
+
+
+def u(x, y, test_case=None):
+    if test_case == 1:
+        return x ** 3 - x ** 2 * y + y ** 2 - 1
+    if test_case == 2:
+        return x ** 2 * y ** 2
+
+
+def construct_qt(etov_dict, VX, VY, test_case=None):
+    """
+    Computes points as means of each elements' vertices.
+    """
+    qt_dict = dict()
+    for e, (v1, v2, v3) in etov_dict.items():
+        if test_case == 1:
+            x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
+            y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
+
+            def f(x, y):
+                return -6 * x + 2 * y - 2
+
+            q1 = f(x1, y1)
+            q2 = f(x2, y2)
+            q3 = f(x3, y3)
+
+            q_avg = np.mean([q1, q2, q3])
+            qt_dict[e] = q_avg
+        elif test_case == 2:
+            x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
+            y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
+
+            def f(x, y):
+                return -4
+
+            q1 = f(x1, y1)
+            q2 = f(x2, y2)
+            q3 = f(x3, y3)
+
+            q_avg = np.mean([q1, q2, q3])
+            qt_dict[e] = q_avg
+        else:
+            raise Exception("Unknown test case")
+    return qt_dict
 
 
 def test_case_data(nr_of_test_case):
@@ -33,15 +87,18 @@ def test_case_data(nr_of_test_case):
         raise Exception("Unknown test case")
 
 
-
-
 def main():
-    ntest_case = 2
+    ntest_case = 1
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
+    uhat=u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, ntest_case)
+    print(uhat)
 
-    A, b = boundary_conditions(X, Y, etov_dict, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=ntest_case)
+    #x = np.linspace(x0, L1 + x0, 0.1)
+    #y = np.linspace(y0, L2 + y0, 0.1)
+    #u_1 = u(x, y, 1)
+    #print(u_1)
 
 
 if __name__ == '__main__':
