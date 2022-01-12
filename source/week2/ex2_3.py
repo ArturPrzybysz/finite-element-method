@@ -15,7 +15,7 @@ def compute_k_rsn(abc, delta, r, s, lam1, lam2):
     return k_rsn
 
 
-def assembly(VX, VY, EToV, lam1, lam2, qt, M):
+def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
     """
         TODO: explanation
     """
@@ -31,7 +31,8 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M):
         abc, delta = basfun(n, VX, VY, EToV)
         for r in range(3):
             i = EToV[n][r] - 1
-            qr = qt[n]
+
+            qr = qt[n] * np.abs(delta) / 3
             b[i] += qr
             for s in range(3):
                 j = EToV[n][s] - 1
@@ -76,7 +77,7 @@ def test_case_data(nr_of_test_case):
         # TODO: get lambda value
         lam1 = 1
         lam2 = 1
-        qt = construct_qt(etov, X, Y, test_case=2)
+        qt = construct_qt(etov, X, Y, test_case=1)
         return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
     elif nr_of_test_case == 2:
         X, Y = xy(x0=-2.5, y0=-4.8, L1=7.6, L2=5.9, noelms1=4, noelms2=3)
@@ -85,7 +86,6 @@ def test_case_data(nr_of_test_case):
         lam1 = 1
         lam2 = 1
         qt = construct_qt(etov, X, Y, test_case=2)
-
         return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
     else:
         raise Exception("Unknown test case")
@@ -116,6 +116,7 @@ def main():
     nr_of_test_case, X, Y, etov_dict, M, lam1, lam2, qt = test_case_data(2)
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     B, d = sparse_diags(A)
+
     print()
 
 

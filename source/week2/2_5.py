@@ -2,7 +2,7 @@ import numpy as np
 from source.week2.ex2_1 import construct_element_table, xy
 from source.week2.ex2_3 import assembly, construct_qt
 from source.week2.ex2_4 import boundary_conditions
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 def u_hat(X, Y, etov_dict, L1, L2, x0, y0, M, A, b, test_case):
@@ -87,10 +87,10 @@ def test_case_data(nr_of_test_case):
         raise Exception("Unknown test case")
 
 
-def max_error(u,u_hat,M):
-    errors=[]
+def max_error(u, u_hat, M):
+    errors = []
     for i in range(M):
-        errors.append(abs(u[i]-u_hat[i]))
+        errors.append(abs(u[i] - u_hat[i]))
     return max(errors)
 
 
@@ -103,8 +103,9 @@ def main():
     print("u_hat", uhat)
     u1 = u(X, Y, ntest_case)
     print("u1", u1)
-    error=max_error(u1,uhat,M)
+    error = max_error(u1, uhat, M)
     print(error)
+
 
 if __name__ == '__main__':
     main()
