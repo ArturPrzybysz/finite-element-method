@@ -59,8 +59,8 @@ def q(VX, VY, etov, lam1, lam2, n, k, test_case=None):
         return - lam1 * u_x * n1 - lam2 * u_y * n2
 
     if test_case == 2:
-        u_xx = -np.sin(VX) * np.sin(VY)
-        u_yy = -np.sin(VX) * np.sin(VY)
+        u_xx = -np.sin(?) * np.sin(?)
+        u_yy = -np.sin(?) * np.sin(?)
         return -u_xx - u_yy
 
 
@@ -75,7 +75,8 @@ def neumann_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1
         x_r, y_r = VX[global_r - 1], VY[global_r - 1]
         x_s, y_s = VX[global_s - 1], VY[global_s - 1]
 
-        q_ = q(VX, VY, EToV, lam1, lam2, e, k=1, test_case=test_case)
+        q_1TODO = q(VX, VY, EToV, lam1, lam2, e, k=r, test_case=test_case)
+        q_2TODO = q(VX, VY, EToV, lam1, lam2, e, k=s, test_case=test_case)
         q_1 = q_ / 2 * np.sqrt((x_r - x_s) ** 2 + (y_r - y_s) ** 2)  # q_2 == q_1
         b[global_r - 1] -= q_1
         b[global_s - 1] -= q_1
