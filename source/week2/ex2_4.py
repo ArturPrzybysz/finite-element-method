@@ -1,6 +1,6 @@
 import numpy as np
 from ex2_1 import construct_element_table, xy
-from ex2_3 import assembly, construct_qt
+from ex2_3 import assembly, construct_qt, sparse_diags
 
 '''
 def somega(EToV, element_idx, M):
@@ -92,13 +92,16 @@ def test_case_data(nr_of_test_case):
 
 
 def main():
-    ntest_case = 2
+    ntest_case = 1
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     A_updated, b_updated = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b,
                                                test_case=ntest_case, exercise="2_4")
-    print(b_updated)
+    B, d = sparse_diags(A_updated)
+    print("d", d)
+    print("b: ", b)
 
 
-main()
+if __name__ == '__main__':
+    main()

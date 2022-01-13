@@ -1,15 +1,12 @@
 import numpy as np
 from source.week2.ex2_1 import construct_element_table, xy
-from source.week2.ex2_3 import assembly, construct_qt
+from source.week2.ex2_3 import assembly
 from source.week2.ex2_4 import boundary_conditions
-import matplotlib.pyplot as plt
 
 
 def u_hat(X, Y, L1, L2, x0, y0, M, A, b, test_case):
-    # we have f=u, to get q we need to solve q(x,y)=-(u_(xx)+u_(yy))
     # u_hat --> Au=b
     A, b = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case, exercise="2_5")
-    print("A:", A)
     uhat = np.linalg.solve(A, b)
     return uhat
 
@@ -60,10 +57,10 @@ def construct_qt(etov_dict, VX, VY, test_case=None):
 
 def test_case_data(nr_of_test_case):
     if nr_of_test_case == 1:
-        L1 = 1
-        L2 = 1
-        x0 = 0
-        y0 = 0
+        L1 = 7.6
+        L2 = 5.9
+        x0 = -2.5
+        y0 = -4.8
         X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=4, noelms2=3)
         etov_dict, M = construct_element_table(4, 3)
         lam1 = 1
@@ -76,8 +73,10 @@ def test_case_data(nr_of_test_case):
         L2 = 5.9
         x0 = -2.5
         y0 = -4.8
-        X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=4, noelms2=3)
-        etov_dict, M = construct_element_table(4, 3)
+        p = 1
+        noelms = 2 ** p
+        X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=noelms, noelms2=noelms)
+        etov_dict, M = construct_element_table(noelms, noelms)
         lam1 = 1
         lam2 = 1
         qt = construct_qt(etov_dict, X, Y, test_case=2)
@@ -99,11 +98,12 @@ def main():
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     uhat = u_hat(X, Y, L1, L2, x0, y0, M, A, b, ntest_case)
-    print("u_hat", uhat)
+    print("test case ",ntest_case)
+    print("u_hat(x,y): ", uhat)
     u1 = u(X, Y, ntest_case)
-    print("u1", u1)
+    print("u(x,y): ", u1)
     error = max_error(u1, uhat, M)
-    print(error)
+    print("Max error: ",error)
 
 
 if __name__ == '__main__':
