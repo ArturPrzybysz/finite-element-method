@@ -16,10 +16,11 @@ def main():
     test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2 = test_case_data_ex_2_7(2)
     lower_points, upper_points = construct_boundary_edges(X, Y, etov, tol=0.00005, x0=x0, y0=y0, L1=L1, L2=L2)
     A, b = assembly(X, Y, etov, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    b_neumann = neumann_boundary_conditions(X, Y, etov, upper_points, qt, b)
+    b_neumann = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_points, qt, b, test_case=test_case)
     u_hat = np.linalg.solve(A, b_neumann)
     u = u_true(X, Y, test_case)
     print()
+    print(u_hat)
 
 
 if __name__ == '__main__':
