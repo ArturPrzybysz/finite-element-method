@@ -20,14 +20,9 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
         TODO: explanation
     """
     N = len(EToV)
-    iL = np.zeros(3 * 3 * N)
-    jL = np.zeros(3 * 3 * N)
-    sL = np.zeros(3 * 3 * N)
-    count = 0
     A = np.zeros((M, M))
     b = np.zeros(M)
     for n in range(1, N + 1):
-        # q = qt[n]
         abc, delta = basfun(n, VX, VY, EToV)
         for r in range(3):
             i = EToV[n][r] - 1
@@ -37,9 +32,6 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
             for s in range(3):
                 j = EToV[n][s] - 1
                 k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)
-                iL[count] = i
-                jL[count] = j
-                sL[count] = k_rsn
                 A[i, j] += k_rsn
     return A, b  # TODO: make sure A is sparse
 
