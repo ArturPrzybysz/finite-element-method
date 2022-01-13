@@ -16,9 +16,6 @@ def compute_k_rsn(abc, delta, r, s, lam1, lam2):
 
 
 def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
-    """
-        TODO: explanation
-    """
     N = len(EToV)
     A = np.zeros((M, M))
     b = np.zeros(M)
@@ -26,14 +23,13 @@ def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
         abc, delta = basfun(n, VX, VY, EToV)
         for r in range(3):
             i = EToV[n][r] - 1
-
-            qr = qt[n] * np.abs(delta) / 3
+            qr = qt[n] * np.abs(delta) / 3  # (2.28)
             b[i] += qr
             for s in range(3):
                 j = EToV[n][s] - 1
-                k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)
+                k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)  # (2.27)
                 A[i, j] += k_rsn
-    return A, b  # TODO: make sure A is sparse
+    return A, b
 
 
 def construct_qt(etov_dict, VX, VY, test_case=None):

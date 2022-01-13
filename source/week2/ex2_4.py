@@ -95,7 +95,7 @@ def test_case_data(nr_of_test_case):
 
 
 def main():
-    ntest_case = 1
+    ntest_case = 2
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
