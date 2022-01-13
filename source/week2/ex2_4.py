@@ -48,6 +48,8 @@ def boundary_conditions(X, Y, L1, L2, x0, y0, M, A, b, test_case=None, exercise=
                 return x ** 3 - x ** 2 * y + y ** 2 - 1
             if test_case == 2:
                 return x ** 2 * y ** 2
+    else:
+        raise Exception("Unknown exercise")
     for i in range(len(X)):
         if np.allclose(X[i], x0) or np.allclose(X[i], x0 + L1) or np.allclose(Y[i], y0) or np.allclose(Y[i], y0 + L2):
             A[i, i] = 1

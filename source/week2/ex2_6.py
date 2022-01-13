@@ -14,10 +14,7 @@ Hint: Check slide 30 in lecture 4 on Mesh Generation. Signed distance functions 
 """
 
 
-def construct_beds(VX, VY, EToV, tol, u_function):
-    """
-
-    """
+def construct_boundary_edges(VX, VY, EToV, tol, u_function, x0, y0, L1, L2):
     Ms = []
     rs = []
     for e, indices in EToV.items():
