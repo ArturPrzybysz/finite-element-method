@@ -70,23 +70,30 @@ def construct_qt(etov_dict, VX, VY, test_case=None):
     return qt_dict
 
 
-def test_case_data(nr_of_test_case):
+def test_case_data_ex_2_3(nr_of_test_case):
     if nr_of_test_case == 1:
-        X, Y = xy(x0=0, y0=0, L1=1, L2=1, noelms1=4, noelms2=3)
+        x0 = 0
+        y0 = 0
+        L1 = 1
+        L2 = 1
+        X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=4, noelms2=3)
         etov, M = construct_element_table(4, 3)
         # TODO: get lambda value
         lam1 = 1
         lam2 = 1
         qt = construct_qt(etov, X, Y, test_case=1)
-        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
+        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2
     elif nr_of_test_case == 2:
-        X, Y = xy(x0=-2.5, y0=-4.8, L1=7.6, L2=5.9, noelms1=4, noelms2=3)
+        x0 = -2.5
+        y0 = -4.8
+        L1 = 7.6
+        L2 = 5.9
+        X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=4, noelms2=3)
         etov, M = construct_element_table(4, 3)
-        # TODO: get lambda value
         lam1 = 1
         lam2 = 1
         qt = construct_qt(etov, X, Y, test_case=2)
-        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt
+        return nr_of_test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2
     else:
         raise Exception("Unknown test case")
 
@@ -113,7 +120,7 @@ def sparse_diags(A):
 
 
 def main():
-    nr_of_test_case, X, Y, etov_dict, M, lam1, lam2, qt = test_case_data(2)
+    nr_of_test_case, X, Y, etov_dict, M, lam1, lam2, qt, x0, y0, L1, L2 = test_case_data_ex_2_3(2)
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
     B, d = sparse_diags(A)
 
