@@ -4,9 +4,10 @@ from source.week2.ex2_3 import assembly
 from source.week2.ex2_4 import boundary_conditions
 
 
-def u_hat(X, Y, L1, L2, x0, y0, M, A, b, test_case):
+
+def u_hat(X, Y, L1, L2, x0, y0, M, A, b, test_case=None,exercise=None):
     # u_hat --> Au=b
-    A, b = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case, exercise="2_5")
+    A, b = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b, test_case=test_case, exercise=exercise)
     uhat = np.linalg.solve(A, b)
     return uhat
 
@@ -97,7 +98,7 @@ def main():
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    uhat = u_hat(X, Y, L1, L2, x0, y0, M, A, b, ntest_case)
+    uhat = u_hat(X, Y, L1, L2, x0, y0, M, A, b, ntest_case,"2_5")
     print("test case ",ntest_case)
     print("u_hat(x,y): ", uhat)
     u1 = u(X, Y, ntest_case)
