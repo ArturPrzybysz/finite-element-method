@@ -33,6 +33,10 @@ def outernormal(n, k, VX, VY, EtoV):
     numerator = np.array([t12[1], -t12[0]]).T
     denominator = np.sqrt(t12[1] ** 2 + t12[0] ** 2)
     n = numerator / denominator
+
+    # Validation
+    test = n.dot(t12)
+    assert test == 0
     return n
 
 

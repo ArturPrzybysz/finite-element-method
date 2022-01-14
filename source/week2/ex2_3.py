@@ -15,7 +15,7 @@ def compute_k_rsn(abc, delta, r, s, lam1, lam2):
     return k_rsn
 
 
-def assembly(VX, VY, EToV, lam1, lam2, qt, M, ):
+def assembly(VX, VY, EToV, lam1, lam2, qt, M):
     N = len(EToV)
     A = np.zeros((M, M))
     b = np.zeros(M)

@@ -62,22 +62,11 @@ def construct_boundary_edges(VX, VY, EToV, tol, x0, y0, L1, L2):
     #         upper_points.remove(overlap)
     #     else:
     #         lower_points.remove(overlap)
+
+    print()
+
     return list(lower_points), list(upper_points)
 
-
-# def q(VX, VY, etov, lam1, lam2, n, k, test_case=None):
-#     if test_case == 1:
-#         u_x = 3
-#         u_y = 5
-#         n = outernormal(n, k, VX, VY, etov)
-#         n1, n2 = n[0], n[1]
-#         return - lam1 * u_x * n1 - lam2 * u_y * n2
-#
-#     if test_case == 2:
-#         pass
-#         # u_xx = -np.sin(?) *np.sin(?)
-#         # u_yy = -np.sin(?) *np.sin(?)
-#         # return -u_xx - u_yy
 
 def q1q2(x_i, x_j, y_i, y_j, lam1, lam2, test_case, n, k, VX, VY, etov):
     if test_case == 1:  # q(x,y) is constant
@@ -111,8 +100,23 @@ def neumann_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1
         x_r, y_r = VX[global_r - 1], VY[global_r - 1]
         x_s, y_s = VX[global_s - 1], VY[global_s - 1]
         q1, q2 = q1q2(x_r, x_s, y_r, y_s, lam1, lam2, test_case, e, r, VX, VY, EToV)
-        b[global_r - 1] -= q1
-        b[global_s - 1] -= q2
+        b[global_r - 1] += q1  # TODO: validate
+        b[global_s - 1] += q2
+    return b
+
+
+def dirichlet_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1, test_case):  #
+    b = np.array(b1)
+    for e, r in boundary_edges:
+        s = (r + 1) % 3
+        vertice_tuple = EToV[e]
+        global_r = vertice_tuple[r]
+        global_s = vertice_tuple[s]
+        x_r, y_r = VX[global_r - 1], VY[global_r - 1]
+        x_s, y_s = VX[global_s - 1], VY[global_s - 1]
+        q1, q2 = q1q2(x_r, x_s, y_r, y_s, lam1, lam2, test_case, e, r, VX, VY, EToV)
+        b[global_r - 1] += q1  # TODO: validate
+        b[global_s - 1] += q2
     return b
 
 
@@ -123,21 +127,14 @@ def construct_qt_2_7(etov, VX, VY, test_case, lam1=1, lam2=1):
             x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
             y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
 
-            # def f(x, y, lam1, lam2, n, k):
-            #     u_x = 3
-            #     u_y = 5
-            #     n = outernormal(n, k, VX, VY, etov)
-            #     n1, n2 = n[0], n[1]
-            #     return - lam1 * u_x * n1 - lam2 * u_y * n2
-
-            def f(x, y, lam1, lam2, n, k):
+            def f():
                 u_xx = 0
                 u_yy = 0
                 return - u_xx - u_yy
 
-            q1 = f(x1, y1, lam1=lam1, lam2=lam2, n=e, k=1)
-            q2 = f(x2, y2, lam1=lam1, lam2=lam2, n=e, k=2)
-            q3 = f(x3, y3, lam1=lam1, lam2=lam2, n=e, k=3)
+            q1 = f()
+            q2 = f()
+            q3 = f()
 
             q_avg = np.mean([q1, q2, q3])
             qt_dict[e] = q_avg
@@ -145,21 +142,14 @@ def construct_qt_2_7(etov, VX, VY, test_case, lam1=1, lam2=1):
             x1, x2, x3 = VX[v1 - 1], VX[v2 - 1], VX[v3 - 1]
             y1, y2, y3 = VY[v1 - 1], VY[v2 - 1], VY[v3 - 1]
 
-            def f(x, y, lam1, lam2, n, k):
+            def f(x, y):
                 u_xx = -np.sin(x) * np.sin(y)
                 u_yy = -np.sin(x) * np.sin(y)
                 return -u_xx - u_yy
 
-            # def f(x, y, lam1, lam2, n, k):
-            #     u_x = np.cos(x) * np.sin(y)
-            #     u_y = np.sin(x) * np.cos(y)
-            #     n = outernormal(n, k, VX, VY, etov)
-            #     n1, n2 = n[0], n[1]
-            #     return - lam1 * u_x * n1 - lam2 * u_y * n2
-
-            q1 = f(x1, y1, lam1=lam1, lam2=lam2, n=e, k=1)
-            q2 = f(x2, y2, lam1=lam1, lam2=lam2, n=e, k=2)
-            q3 = f(x3, y3, lam1=lam1, lam2=lam2, n=e, k=3)
+            q1 = f(x1, y1)
+            q2 = f(x2, y2)
+            q3 = f(x3, y3)
 
             q_avg = np.mean([q1, q2, q3])
             qt_dict[e] = q_avg
@@ -199,15 +189,15 @@ def test_case_data_ex_2_7(test_case):
 
 def main():
     # nr_of_test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2 = test_case_data_ex_2_7(1)
-    nr_of_test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2 = test_case_data(2)
+    nr_of_test_case, X, Y, L1, L2, x0, y0, etov, M, lam1, lam2, qt = test_case_data(2)
     lower_points, upper_points = construct_boundary_edges(X, Y, etov, tol=0.0005, x0=x0, y0=y0, L1=L1, L2=L2)
     visualise(X, Y, etov, lower_points)
     visualise(X, Y, etov, upper_points)
     A, b = assembly(X, Y, etov, lam1=lam1, lam2=lam2, qt=qt, M=M)
     b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_points, qt, b, test_case=nr_of_test_case)
-    b_neumann2 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, lower_points, qt, b_neumann1,
-                                             test_case=nr_of_test_case)
-    u = np.linalg.solve(A, b)
+    # b_neumann2 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, lower_points, qt, b_neumann1,
+    #                                          test_case=nr_of_test_case)
+    u = np.linalg.solve(A, b_neumann1)
     print()
 
 

@@ -2,7 +2,6 @@ import numpy as np
 from ex2_1 import construct_element_table, xy
 from ex2_3 import assembly, construct_qt, sparse_diags
 
-'''
 def somega(EToV, element_idx, M):
     i_idx, j, k = EToV[element_idx]
     somega = []
@@ -13,9 +12,8 @@ def somega(EToV, element_idx, M):
             omega = omega.append(i_tocheck, k_tocheck)
         if (i_idx == k_tocheck):
            omega = omega.append(i_tocheck, j_tocheck)
-        somega = somega.append(omega)   
+        somega = somega.append(omega)
     return somega
-'''
 
 """
 def f(x, y, test_case=None):
@@ -63,7 +61,7 @@ def boundary_conditions(X, Y, L1, L2, x0, y0, M, A, b, test_case=None, exercise=
                         b[j] -= A[j, i] * f(X[i], Y[i], test_case)
                         A[j, i] = 0
 
-    return np.round(A, 4), np.round(b, 4)
+    return A, b
 
 
 def test_case_data(nr_of_test_case):
