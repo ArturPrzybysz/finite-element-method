@@ -68,29 +68,40 @@ def construct_boundary_edges(VX, VY, EToV, tol, x0, y0, L1, L2):
     return list(lower_points), list(upper_points)
 
 
-def q1q2(x_i, x_j, y_i, y_j, lam1, lam2, test_case, n, k, VX, VY, etov):
-    if test_case == 1:  # q(x,y) is constant
-        u_x = 3  # derivative of (3x + 5y - 7) over x
-        u_y = 5  # derivative of (3x + 5y - 7) over y
-        n = outernormal(n, k + 1, VX, VY, etov)
-        n1, n2 = n[0], n[1]
-        q = -lam1 * u_x * n1 - lam2 * u_y * n2
-        q_1 = q_2 = q / 2 * np.sqrt((x_i - x_j) ** 2 + (y_i - y_j) ** 2)
-        return q_1, q_2
-    if test_case == 2:  # q(x,y) is NOT constant
+def q1q2(x_i, x_j, y_i, y_j, lam1, lam2, test_case, n, k, VX, VY, etov,exercise):
+    if exercise=="2_7":
+        if test_case == 1:  # q(x,y) is constant
+            u_x = 3  # derivative of (3x + 5y - 7) over x
+            u_y = 5  # derivative of (3x + 5y - 7) over y
+            n = outernormal(n, k + 1, VX, VY, etov)
+            n1, n2 = n[0], n[1]
+            q = -lam1 * u_x * n1 - lam2 * u_y * n2
+            q_1 = q_2 = q / 2 * np.sqrt((x_i - x_j) ** 2 + (y_i - y_j) ** 2)
+            return q_1, q_2
+        if test_case == 2:  # q(x,y) is NOT constant
+            x_c = np.mean([x_i, x_j])  # (2.42)
+            y_c = np.mean([y_i, y_j])
+            n = outernormal(n, k + 1, VX, VY, etov)
+            n1, n2 = n[0], n[1]
+            u_x = np.cos(x_c) * np.sin(y_c)  # derivative of sin(x)*sin(y) over x
+            u_y = np.cos(y_c) * np.sin(x_c)  # derivative of sin(x)*sin(y) over y
+            q = -lam1 * u_x * n1 - lam2 * u_y * n2
+            q_1 = q_2 = q / 2 * np.sqrt((x_i - x_j) ** 2 + (y_i - y_j) ** 2)
+            return q_1, q_2
+    elif exercise=="2_8":
         x_c = np.mean([x_i, x_j])  # (2.42)
         y_c = np.mean([y_i, y_j])
         n = outernormal(n, k + 1, VX, VY, etov)
         n1, n2 = n[0], n[1]
-        u_x = np.cos(x_c) * np.sin(y_c)  # derivative of sin(x)*sin(y) over x
-        u_y = np.cos(y_c) * np.sin(x_c)  # derivative of sin(x)*sin(y) over y
+        u_x = -np.sin(np.pi *x_c) * np.cos(np.pi*y_c)*np.pi  # derivative cos(πx) cos(πy)  over x
+        u_y =- np.cos(np.pi*x_c) * np.sin(np.pi*y_c)*np.pi  # derivative of cos(πx) cos(πy) over y
         q = -lam1 * u_x * n1 - lam2 * u_y * n2
         q_1 = q_2 = q / 2 * np.sqrt((x_i - x_j) ** 2 + (y_i - y_j) ** 2)
         return q_1, q_2
     raise ValueError("Unknown test case")
 
 
-def neumann_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1, test_case):
+def neumann_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1, test_case,exercise):
     b = np.array(b1)
     for e, r in boundary_edges:
         s = (r + 1) % 3
@@ -99,25 +110,12 @@ def neumann_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1
         global_s = vertice_tuple[s]
         x_r, y_r = VX[global_r - 1], VY[global_r - 1]
         x_s, y_s = VX[global_s - 1], VY[global_s - 1]
-        q1, q2 = q1q2(x_r, x_s, y_r, y_s, lam1, lam2, test_case, e, r, VX, VY, EToV)
+        q1, q2 = q1q2(x_r, x_s, y_r, y_s, lam1, lam2, test_case, e, r, VX, VY, EToV,exercise=exercise)
         b[global_r - 1] += q1  # TODO: validate
         b[global_s - 1] += q2
     return b
 
 
-def dirichlet_boundary_conditions(VX, VY, lam1, lam2, EToV, boundary_edges, qt, b1, test_case):  #
-    b = np.array(b1)
-    for e, r in boundary_edges:
-        s = (r + 1) % 3
-        vertice_tuple = EToV[e]
-        global_r = vertice_tuple[r]
-        global_s = vertice_tuple[s]
-        x_r, y_r = VX[global_r - 1], VY[global_r - 1]
-        x_s, y_s = VX[global_s - 1], VY[global_s - 1]
-        q1, q2 = q1q2(x_r, x_s, y_r, y_s, lam1, lam2, test_case, e, r, VX, VY, EToV)
-        b[global_r - 1] += q1  # TODO: validate
-        b[global_s - 1] += q2
-    return b
 
 
 def construct_qt_2_7(etov, VX, VY, test_case, lam1=1, lam2=1):
@@ -194,7 +192,7 @@ def main():
     visualise(X, Y, etov, lower_points)
     visualise(X, Y, etov, upper_points)
     A, b = assembly(X, Y, etov, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_points, qt, b, test_case=nr_of_test_case)
+    b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_points, qt, b, test_case=nr_of_test_case,exercise="2_7")
     # b_neumann2 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, lower_points, qt, b_neumann1,
     #                                          test_case=nr_of_test_case)
     u = np.linalg.solve(A, b_neumann1)

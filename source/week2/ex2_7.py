@@ -1,3 +1,4 @@
+import math
 from itertools import chain
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,6 +56,9 @@ def f_i_value(exercise, test_case, x, y):
             return 3 * x + 5 * y - 7
         if test_case == 2:
             return np.sin(x) * np.sin(y)
+    elif exercise == "2_8":
+        return math.cos(math.pi*x)*math.cos(math.pi*y)
+
     raise ValueError("Wrong exercise value.")
     # elif exercise == "2_8":
     #     if test_case == 1:
@@ -91,7 +95,7 @@ def main():
     upper_edges, lower_edges = construct_boundary_edges(X, Y, etov, tol=0.0005, x0=x0, y0=y0, L1=L1, L2=L2)
     # visualise(X, Y, etov, upper_edges)
     A, b = assembly(X, Y, etov, lam1=lam1, lam2=lam2, qt=qt, M=M)
-    b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_edges, qt, b, test_case=test_case)
+    b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_edges, qt, b, test_case=test_case,exercise="2_7")
     A_final, b_final = dirichlet_boundary_conditions(A, b_neumann1, lower_edges, etov, X, Y, "2_7",
                                                      test_case)
     u_hat = np.linalg.solve(A_final, b_final)
