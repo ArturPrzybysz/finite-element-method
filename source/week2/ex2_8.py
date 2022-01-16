@@ -2,17 +2,15 @@ import math
 
 import numpy as np
 from ex2_1 import construct_element_table, xy
-from ex2_3 import assembly, construct_qt
+from ex2_3 import assembly
 from ex2_4 import boundary_conditions
 from ex2_5 import u_hat, max_error
+from source.week2.ex2_6 import neumann_boundary_conditions, construct_boundary_edges
+from source.week2.ex2_7 import dirichlet_boundary_conditions
 
 
 def u(x, y):
     return math.cos(math.pi * x) * math.cos(math.pi * y)
-
-
-def neumann_boundary():
-    pass
 
 
 def construct_qt(etov_dict, VX, VY, test_case=None):
@@ -79,13 +77,23 @@ def conditions(part=None):
 def main():
     part = "b"
     if part == "b":
-        # part b) x0=y0=0,L1=L2=1 --> 0<=x,y<=1,
+        # part b) x0=y0=0,L1=L2=1 --> 0<=x,y<=1
         L1_b, L2_b, x0_b, y0_b, lam1_b, lam2_b, noelms1_b, noelms2_b = conditions(part)
         X_b, Y_b = xy(x0=x0_b, y0=y0_b, L1=L1_b, L2=L2_b, noelms1=noelms1_b, noelms2=noelms2_b)
         etov_dict_b, M_b = construct_element_table(noelms1_b, noelms2_b)
         qt_b = construct_qt(etov_dict_b, X_b, Y_b, test_case=1)
         A_b, b_b = assembly(X_b, Y_b, etov_dict_b, lam1=lam1_b, lam2=lam2_b, qt=qt_b, M=M_b)
-        uhat_b = u_hat(X_b, Y_b, L1_b, L2_b, x0_b, y0_b, M_b, A_b, b_b, exercise="2_8")
+
+        """"
+        upper_edges, lower_edges = construct_boundary_edges(X_b, Y_b, etov_dict_b, tol=0.0005, x0=x0_b, y0=y0_b, L1=L1_b, L2=L2_b)
+        b_neumann1 = neumann_boundary_conditions(X_b, Y_b, lam1_b, lam2_b, etov_dict_b, upper_edges, qt_b, b_b, test_case=1,exercise="2_8")
+        A_final, b_final = dirichlet_boundary_conditions(A_b, b_neumann1, lower_edges, etov_dict_b, X_b, Y_b, "2_8",
+                                                      test_case=1)    
+        """
+
+        A_final,b_final=boundary_conditions(X_b, Y_b, L1_b,L2_b,x0_b,y0_b, M_b,  A_b, b_b,test_case = None, exercise = "2_8")
+        uhat_b = np.linalg.solve(A_final, b_final)
+
         print("u_hat(x,y) part b): ", uhat_b)
         u_b = []
         for x, y in zip(X_b, Y_b):
@@ -95,14 +103,15 @@ def main():
         print("Max error part b): ", error_b)
 
     elif part == "c":
-        # part c) x0=y0=-1,L1=L2=1 --> -1<=x,y<=1, note x0,y0 here represent left boundary,
-        # whereas L1,L2 right
+        # part c)
         L1_c, L2_c, x0_c, y0_c, lam1_c, lam2_c, noelms1_c, noelms2_c = conditions(part)
         X_c, Y_c = xy(x0=x0_c, y0=y0_c, L1=L1_c, L2=L2_c, noelms1=noelms1_c, noelms2=noelms2_c)
         etov_dict_c, M_c = construct_element_table(noelms1_c, noelms2_c)
         qt_c = construct_qt(etov_dict_c, X_c, Y_c, test_case=1)
         A_c, b_c = assembly(X_c, Y_c, etov_dict_c, lam1=lam1_c, lam2=lam2_c, qt=qt_c, M=M_c)
-        uhat_c = u_hat(X_c, Y_c, L1_c, L2_c, x0_c, y0_c, M_c, A_c, b_c, exercise="2_8")
+        A_final, b_final = boundary_conditions(X_c, Y_c, L1_c, L2_c, x0_c, y0_c, M_c, A_c, b_c, test_case=None,
+                                               exercise="2_8")
+        uhat_c = np.linalg.solve(A_final, b_final)
         print("u_hat(x,y) part b): ", uhat_c)
         u_c = []
         for x, y in zip(X_c, Y_c):

@@ -46,6 +46,9 @@ def boundary_conditions(X, Y, L1, L2, x0, y0, M, A, b, test_case=None, exercise=
                 return x ** 3 - x ** 2 * y + y ** 2 - 1
             if test_case == 2:
                 return x ** 2 * y ** 2
+    elif exercise == "2_8":
+        def f(x, y, test_case=None):
+            return np.cos(np.pi*x)*np.cos(np.pi*y)
     else:
         raise Exception("Unknown exercise")
 
