@@ -32,8 +32,8 @@ def visualise(VX, VY, EToV, boundary_edges):
         x_r, y_r = VX[v1 - 1], VY[v1 - 1]
         x_s, y_s = VX[v2 - 1], VY[v2 - 1]
         plt.scatter(x_r, y_r, c='red')
-        plt.plot([x_r, x_s], [y_r, y_s], c='green')
-
+        plt.plot([x_r, x_s], [y_r, y_s], c='green', alpha=0.3)
+        # plt.show()
     plt.show()
 
 

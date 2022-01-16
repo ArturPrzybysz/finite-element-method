@@ -23,25 +23,6 @@ def find_neighbors(n, etov):
                     for v in vertice_tuple}
     vertices_set.remove(n)
     return list(vertices_set)
-    # boundary_vertices = ...
-    #
-    # neighbors = []
-    #
-    # if (n-1) / element_count1 != (n-1) // element_count1:
-    #     neighbors.append(n_up)
-    #     neighbors.append(n_up_left)
-    #
-    # n_up = n - 1
-    # n_up_left = n - element_count1 - 1
-    # n_down = n + 1
-    # n_right = n + element_count1
-    # n_right_down = n + element_count1 + 1
-    # n_left = n - element_count1
-
-    # neighbors = [n_up, n_down, n_right, n_right_down, n_left, n_up_left]
-    # neighbors_without_jump = [neigh for neigh in [n_up, n_down] if neigh % element_count1 == n % element_count1]
-    #
-    # neighbors = set(etov.keys()).intersection({n_up, n_down, n_right, n_right_down, n_left, n_up_left})
 
 
 def find_boundary_indices(lower_edges, etov):
@@ -63,6 +44,26 @@ def f_i_value(exercise, test_case, x, y):
     #         return x ** 2 * y ** 2
 
 
+
+# function [A,b] = dirbc(bnodes,f,A,b)
+#     M = length(b);
+#     nodes = setdiff(linspace(1,M,M),bnodes);
+#     Nodes = zeros(M,1);
+#     Nodes(nodes)=1;
+#     for i = bnodes
+#         A(i,i) = 1;
+#         b(i) = f(i);
+#         for j = 1:M
+#             if i!=j
+#                 A(i,j) = 0;
+#                 if Nodes(j)
+#                     b(j) = b(j)-A(j,i)*f(i);
+#                     A(j,i) = 0;
+#                 end
+#             end
+#         end
+#     end
+# end
 def dirichlet_boundary_conditions(A_old, b_old, lower_edge, etov, VX, VY, exercise, test_case):
     A = np.array(A_old)
     b = np.array(b_old)
@@ -89,7 +90,7 @@ def dirichlet_boundary_conditions(A_old, b_old, lower_edge, etov, VX, VY, exerci
 def main():
     test_case, X, Y, etov, M, lam1, lam2, qt, x0, y0, L1, L2 = test_case_data_ex_2_7(1)
     upper_edges, lower_edges = construct_boundary_edges(X, Y, etov, tol=0.0005, x0=x0, y0=y0, L1=L1, L2=L2)
-    # visualise(X, Y, etov, upper_edges)
+    visualise(X, Y, etov, upper_edges)
     A, b = assembly(X, Y, etov, lam1=lam1, lam2=lam2, qt=qt, M=M)
     b_neumann1 = neumann_boundary_conditions(X, Y, lam1, lam2, etov, upper_edges, qt, b, test_case=test_case)
     A_final, b_final = dirichlet_boundary_conditions(A, b_neumann1, lower_edges, etov, X, Y, "2_7",

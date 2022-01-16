@@ -79,8 +79,7 @@ def conditions(part=None):
 def main():
     part = "b"
     if part == "b":
-        # part b) x0=y0=0,L1=L2=1 --> 0<=x,y<=1, note x0,y0 here represent left boundary,
-        # whereas L1,L2 right
+        # part b) x0=y0=0,L1=L2=1 --> 0<=x,y<=1,
         L1_b, L2_b, x0_b, y0_b, lam1_b, lam2_b, noelms1_b, noelms2_b = conditions(part)
         X_b, Y_b = xy(x0=x0_b, y0=y0_b, L1=L1_b, L2=L2_b, noelms1=noelms1_b, noelms2=noelms2_b)
         etov_dict_b, M_b = construct_element_table(noelms1_b, noelms2_b)
