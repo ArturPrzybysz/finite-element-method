@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import numpy as np
 
 from source.week2a.assembly import assembly
@@ -55,14 +53,14 @@ if __name__ == '__main__':
     # Computing the beds (the index of element and index of the face of boundary nodes)
     gamma1, gamma2, gnodes1, gnodes2 = construct_boundary_edges(VX, VY, EToV, tol, x0, y0, L1, L2)
 
-    # % Creating the q function in the formula from exercise 2.6 for Neumann boundary condition
+    # Creating the q function in the formula from exercise 2.6 for Neumann boundary condition
     # q = @(x,y,n1,n2) -(lam1*qx*n1 + lam2*qy*n2);
 
     def q(x, y, n1, n2):
         return -(lam1 * qx * n1 + lam2 * qy * n2)
 
 
-    # % Computing solution for Neumann boundary condition
+    # Computing solution for Neumann boundary condition
     # b_nc = neubc(VX,VY,EToV,Gamma1,q,b);
     b_nc_expected = [2.95, -5.90, -5.90, -7.70, 0, 0, 0,
                      -9.50, 0, 0, 0, -9.50, 0, 0, 0, -9.50, 0, 0, 0,
@@ -71,7 +69,7 @@ if __name__ == '__main__':
 
     b_nc_compare = np.stack([b_nc, b_nc_expected])
     b_nc_correct = b_nc == b_nc_expected
-    # % Computing solution for Dirichlet boundary condition
+    # Computing solution for Dirichlet boundary condition
     f = ut((VX, VY))
     Gamma1 = list(sorted([EToV[e][v] for e, v in gamma1]))
     Gamma2 = list(sorted([EToV[e][v] for e, v in gamma2]))
@@ -90,8 +88,3 @@ if __name__ == '__main__':
     compare = np.stack([u_hat, f])
     correct = np.isclose(u_hat, f)
     print()
-    #
-    # % Calculation the final solution and reshape it to 2-D array format
-    # u = A_b \ b_b;
-    # U = reshape(u,noelms2+1,noelms1+1);
-    # disp("Solution in 2-D"); U
