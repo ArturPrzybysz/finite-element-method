@@ -46,6 +46,17 @@ def find_element(x_disp, y_disp, X, Y, EToV):
     print()
 
 
+def solve_elements_plane2(x_r, x_s,x_t, y_r, y_s, y_t, u_r, u_s, u_t):
+    A = np.array([[x_r, y_r, u_r, 1],
+                  [x_s, y_s, u_s, 1],
+                  [x_t, y_t, u_t, 1]])
+    b = np.zeros(3)
+    A_inv = np.linalg.pinv(A)
+
+    params = A_inv.dot(b)
+    return params
+
+
 def interpolate_in_mesh(x_val, y_val, element_idx, EToV, X, Y, U):
     r, s, t = EToV[element_idx]
     r -= 1
@@ -58,7 +69,9 @@ def interpolate_in_mesh(x_val, y_val, element_idx, EToV, X, Y, U):
                                 [x_t, y_t, 1]])
     U_vector = np.array([U[r], U[s], U[t]])
     plane = solve_elements_plane(elements_matrix, U_vector)
+    plane2 = solve_elements_plane2(x_r, x_s,x_t, y_r, y_s, y_t, U[r], U[s], U[t])
     u_hat = np.array([x_val, y_val, 1]).dot(plane)
+
     return u_hat
 
 
@@ -163,7 +176,7 @@ def main():
     EToV, M = construct_element_table(elem1, elem2)
 
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-    for i in range(500):
+    for i in range(5):
         errors = np.array([compute_error(e + 1, EToV, X, Y, U_true) for e in range(len(X))])
         argmax = np.argmax(errors) + 1
         refine_mesh(argmax, EToV, X, Y, U_true)
