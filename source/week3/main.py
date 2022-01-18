@@ -86,13 +86,11 @@ def compute_triangle_error(triangle, plane_params1):
     U_vector = np.array([u_1, u_2, u_c])
 
     plane_params2 = solve_elements_plane(elements_matrix, U_vector)
-    # print("Now we have all we need to compute the integrals")
+    print("Now we have all we need to compute the integrals")
     return np.random.rand()
 
 
 def refine_mesh(element_idx, EToV, X, Y, U_function):
-    plot_2d_grid(X, Y, EToV, [], elements_to_plot=[x for x in EToV.keys()])
-
     r, s, t = EToV[element_idx]
     r -= 1
     s -= 1
@@ -101,12 +99,12 @@ def refine_mesh(element_idx, EToV, X, Y, U_function):
     y_r, y_s, y_t = Y[r], Y[s], Y[t]
     x_c = (x_r + x_s + x_t) / 3  # Point that splits currently considered mesh into 3 parts (smaller triangles)
     y_c = (y_r + y_s + y_t) / 3
-    X.append(x_c)  # change X to list?
-    Y.append(y_c)  # change X to list?
-    c = len(X) - 1
-    triangle1 = (r, s, c)
-    triangle2 = (s, t, c)
-    triangle3 = (t, r, c)
+    X.append(x_c)
+    Y.append(y_c)
+    c = len(X)
+    triangle1 = (r+1, s+1, c)
+    triangle2 = (s+1, t+1, c)
+    triangle3 = (t+1, r+1, c)
     EToV[element_idx] = triangle1
     last_idx = len(EToV)
     EToV[last_idx + 1] = triangle2
