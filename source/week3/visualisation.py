@@ -28,7 +28,8 @@ def plot_surface(X, Y, elem1, elem2, U_hat):
 
 def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[]):
     plt.scatter(VX, VY, c='grey')
-
+    for idx, (x, y) in enumerate(zip(VX, VY)):
+        plt.text(x, y+0.01, idx,c="grey")
     for p in points_to_plot:
         plt.scatter(*p, c='red')
     for e in elements_to_plot:
@@ -40,7 +41,7 @@ def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[]):
 
             x_r, y_r = VX[v1 - 1], VY[v1 - 1]
             x_s, y_s = VX[v2 - 1], VY[v2 - 1]
-            plt.plot([x_r, x_s], [y_r, y_s], c='red', alpha=0.75)
+            plt.plot([x_r, x_s], [y_r, y_s], c='green', alpha=0.55)
         r, s, t = EToV[e]
         r -= 1
         s -= 1
@@ -49,6 +50,6 @@ def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[]):
         y_r, y_s, y_t = VY[r], VY[s], VY[t]
         x_c = (x_r + x_s + x_t) / 3  # Point that splits currently considered mesh into 3 parts (smaller triangles)
         y_c = (y_r + y_s + y_t) / 3
-        plt.text(x_c,y_c, str(e))
+        plt.text(x_c, y_c, str(e))
 
     plt.show()
