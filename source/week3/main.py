@@ -23,7 +23,7 @@ def is_point_in_triangle(x1, y1, x2, y2, x3, y3, x, y):
     A1 = area(x, y, x2, y2, x3, y3)
     A2 = area(x1, y1, x, y, x3, y3)
     A3 = area(x1, y1, x2, y2, x, y)
-    decision = np.isclose(A, A1 + A2 + A3)
+    decision = np.isclose(A, A1 + A2 + A3, rtol=0.001)
     return decision
 
 
@@ -47,10 +47,7 @@ def find_element(x_disp, y_disp, X, Y, EToV):
 
 
 def interpolate_in_mesh(x_val, y_val, element_idx, EToV, X, Y, U):
-    try:
-        r, s, t = EToV[element_idx]
-    except Exception as e:
-        print()
+    r, s, t = EToV[element_idx]
     r -= 1
     s -= 1
     t -= 1
@@ -86,7 +83,7 @@ def compute_triangle_error(triangle, plane_params1):
     U_vector = np.array([u_1, u_2, u_c])
 
     plane_params2 = solve_elements_plane(elements_matrix, U_vector)
-    print("Now we have all we need to compute the integrals")
+    # print("Now we have all we need to compute the integrals")
     return np.random.rand()
 
 
@@ -102,15 +99,13 @@ def refine_mesh(element_idx, EToV, X, Y, U_function):
     X.append(x_c)
     Y.append(y_c)
     c = len(X)
-    triangle1 = (r+1, s+1, c)
-    triangle2 = (s+1, t+1, c)
-    triangle3 = (t+1, r+1, c)
+    triangle1 = (r + 1, s + 1, c)
+    triangle2 = (s + 1, t + 1, c)
+    triangle3 = (t + 1, r + 1, c)
     EToV[element_idx] = triangle1
     last_idx = len(EToV)
     EToV[last_idx + 1] = triangle2
     EToV[last_idx + 2] = triangle3
-    plot_2d_grid(X, Y, EToV, [], elements_to_plot=[x for x in EToV.keys()])
-
     return EToV, X, Y
 
 
@@ -168,7 +163,7 @@ def main():
     EToV, M = construct_element_table(elem1, elem2)
 
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-    for i in range(50):
+    for i in range(500):
         errors = np.array([compute_error(e + 1, EToV, X, Y, U_true) for e in range(len(X))])
         argmax = np.argmax(errors) + 1
         refine_mesh(argmax, EToV, X, Y, U_true)

@@ -29,7 +29,7 @@ def plot_surface(X, Y, elem1, elem2, U_hat):
 def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[]):
     plt.scatter(VX, VY, c='grey')
     for idx, (x, y) in enumerate(zip(VX, VY)):
-        plt.text(x, y+0.01, idx,c="grey")
+        plt.text(x, y + 0.01, idx, c="grey")
     for p in points_to_plot:
         plt.scatter(*p, c='red')
     for e in elements_to_plot:
