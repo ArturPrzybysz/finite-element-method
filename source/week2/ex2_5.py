@@ -74,7 +74,7 @@ def test_case_data(nr_of_test_case):
         L2 = 5.9
         x0 = -2.5
         y0 = -4.8
-        p = 2
+        p = 1
         noelms = 2 ** p
         X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=noelms, noelms2=noelms)
         etov_dict, M = construct_element_table(noelms, noelms)
@@ -94,7 +94,7 @@ def max_error(u, u_hat, M):
 
 
 def main():
-    ntest_case = 2
+    ntest_case = 1
     nr_of_test_case, X, Y, L1, L2, x0, y0, etov_dict, M, lam1, lam2, qt = test_case_data(ntest_case)
 
     A, b = assembly(X, Y, etov_dict, lam1=lam1, lam2=lam2, qt=qt, M=M)
