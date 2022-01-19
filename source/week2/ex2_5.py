@@ -74,7 +74,7 @@ def test_case_data(nr_of_test_case):
         L2 = 5.9
         x0 = -2.5
         y0 = -4.8
-        p = 1
+        p = 3
         noelms = 2 ** p
         X, Y = xy(x0=x0, y0=y0, L1=L1, L2=L2, noelms1=noelms, noelms2=noelms)
         etov_dict, M = construct_element_table(noelms, noelms)
@@ -105,7 +105,6 @@ def main():
     print("u(x,y): ", u1)
     error = max_error(u1, uhat, M)
     print("Max error: ",error)
-
 
 if __name__ == '__main__':
     main()

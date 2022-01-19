@@ -1,13 +1,12 @@
 from functools import lru_cache
 
 from source.week2.ex2_2a import basfun
-from source.week2.ex2_3 import compute_k_rsn
+from source.week2.ex2_3 import compute_k_rsn, assembly
 from source.week3.construct_etov import construct_element_table
 from source.week3.integration import integration
 from source.week3.visualisation import plot_2d_grid, plot_surface, plot_triangulation
 from source.week3.xy import xy
 import numpy as np
-
 
 
 def solve_elements_plane(x0, x1, x2, y0, y1, y2, z0, z1, z2):
@@ -66,6 +65,7 @@ def refine_mesh(element_idx, EToV, X, Y, U_function):
     EToV[last_idx + 2] = triangle3
     return EToV, X, Y
 
+
 def compute_error(element_idx, EToV, X, Y, U_function, last_error):
     """
     Computes L2 error that could be reduced by introducing another point into mesh triangle in its centroid.
@@ -87,7 +87,6 @@ def compute_error(element_idx, EToV, X, Y, U_function, last_error):
     common_plane = solve_elements_plane(x_r, x_s, x_t, y_r, y_s, y_t, u_r, u_s, u_t)
 
     u_c = eval_u_on_plane(common_plane, x_c, y_c)  # This should be replaced with FEM once we have it
-
 
     # u_d = eval_u_on_plane(common_plane, x_c, y_c)
     u_d = U_true(x_c, y_c)
@@ -122,24 +121,7 @@ def construct_qt(etov_dict, VX, VY):
     return qt_dict
 
 
-def assembly(VX, VY, EToV, lam1, lam2, qt, M):
-    N = len(EToV)
-    A = np.zeros((M, M))
-    b = np.zeros(M)
-    for n in range(1, N + 1):
-        abc, delta = basfun(n, VX, VY, EToV)
-        for r in range(3):
-            i = EToV[n][r] - 1
-            qr = qt[n] * np.abs(delta) / 3  # (2.28)
-            b[i] += qr
-            for s in range(3):
-                j = EToV[n][s] - 1
-                k_rsn = compute_k_rsn(abc, delta, r, s, lam1, lam2)  # (2.27)
-                A[i, j] += k_rsn
-    return A, b
-
-
-def boundary_conditions(X, Y, L1, L2, x0, y0, M, A, b):
+def boundary_conditions(X, Y, L1, L2, x0, y0, A, b):
     def f(x, y):
         return x ** 3 - x ** 2 * y + y ** 2 - 1  # f(x,y)=u(x,y) in our test case
 
@@ -172,36 +154,39 @@ def main():
     # L1 = 1
     # y0 = 0
     # L2 = 1
-    elem1 = 5
-    elem2 = 4
-    x0 = 2.5
+    elem1 = 4
+    elem2 = 3
     L1 = 7.6
-    y0 = 4.8
     L2 = 5.9
+    x0 = -2.5
+    y0 = -4.8
 
     EToV, M = construct_element_table(elem1, elem2)
-
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-    plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
+    # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
 
     optimization_steps = 0
     tol = 0.0001
     max_error = tol + 1
-    last_error =max_error
-
+    last_error = max_error
     qt = construct_qt(EToV, X, Y)
-    A, b = assembly(X, Y, EToV, lam1=1, lam2=1, qt=qt, M=M)
-    A_updated, b_updated = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b)
+    N = len(X)
+    A, b = assembly(X, Y, EToV, lam1=1, lam2=1, qt=qt, M=N)
+    A_updated, b_updated = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, A=A, b=b)
     u_hat = np.linalg.solve(A_updated, b_updated)
-    u=U_true(X,Y)
-    print("u_hat",u_hat)
+    u = U_true(X, Y)
+    print("u_hat", u_hat)
     print("u", u)
+    print(max(u_hat - u))
 
+
+""""
     while max_error > tol:
         errors = np.array([compute_error(e, EToV, X, Y, U_true, last_error) for e in range(1, len(EToV) + 1)])
         argmax = np.argmax(errors)
         qt = construct_qt(EToV, X, Y)
         A, b = assembly(X, Y, EToV, lam1=1, lam2=1, qt=qt, M=M)
+
         A_updated, b_updated = boundary_conditions(X, Y, L1=L1, L2=L2, x0=x0, y0=y0, M=M, A=A, b=b)
         u_hat = np.linalg.solve(A_updated, b_updated)
         # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
@@ -221,7 +206,7 @@ def main():
     print(optimization_steps, max_error)
     plot_2d_grid(X, Y, EToV, text=False)
     plot_triangulation(EToV, X, Y, U_true)
-
+"""
 
 if __name__ == '__main__':
     main()
