@@ -48,6 +48,7 @@ def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[], heatmap=N
     # plt.pcolormesh(Y, X, A)
 
     # plt.imshow(A, cmap='hot', interpolation='nearest')
+    plt.gca().set_aspect('equal', adjustable='box')
 
     plt.scatter(VX, VY, c='grey')
     if text:
