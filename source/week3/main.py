@@ -1,15 +1,10 @@
 from functools import lru_cache
 
 from source.week3.construct_etov import construct_element_table
-from source.week3.visualisation import plot_2d_grid, plot_surface
+from source.week3.integration import integration
+from source.week3.visualisation import plot_2d_grid, plot_surface, plot_triangulation
 from source.week3.xy import xy
 import numpy as np
-
-
-def solve_elements_plane(element_points, elementU):
-    A_inv = np.linalg.pinv(element_points)
-    plane_params = np.dot(A_inv, elementU)
-    return plane_params
 
 
 @lru_cache(maxsize=10000)
@@ -23,7 +18,7 @@ def is_point_in_triangle(x1, y1, x2, y2, x3, y3, x, y):
     A1 = area(x, y, x2, y2, x3, y3)
     A2 = area(x1, y1, x, y, x3, y3)
     A3 = area(x1, y1, x2, y2, x, y)
-    decision = np.isclose(A, A1 + A2 + A3, rtol=0.001)
+    decision = np.isclose(A, A1 + A2 + A3, rtol=0.0000001)
     return decision
 
 
@@ -46,15 +41,26 @@ def find_element(x_disp, y_disp, X, Y, EToV):
     print()
 
 
-def solve_elements_plane2(x_r, x_s,x_t, y_r, y_s, y_t, u_r, u_s, u_t):
-    A = np.array([[x_r, y_r, u_r, 1],
-                  [x_s, y_s, u_s, 1],
-                  [x_t, y_t, u_t, 1]])
-    b = np.zeros(3)
-    A_inv = np.linalg.pinv(A)
+def solve_elements_plane(x0, x1, x2, y0, y1, y2, z0, z1, z2):
+    ux, uy, uz = [x1 - x0, y1 - y0, z1 - z0]
+    vx, vy, vz = [x2 - x0, y2 - y0, z2 - z0]
 
-    params = A_inv.dot(b)
-    return params
+    u_cross_v = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx]
+    p0 = x0, y0, z0
+    point = np.array(p0)
+    normal = np.array(u_cross_v)
+
+    a = normal[0]
+    b = normal[1]
+    c = normal[2]
+    d = -point.dot(normal)
+    return a, b, c, d
+
+
+def eval_u_on_plane(plane, x, y):
+    a, b, c, d = plane
+    u = (-a * x - b * y - d) / c
+    return u
 
 
 def interpolate_in_mesh(x_val, y_val, element_idx, EToV, X, Y, U):
@@ -64,14 +70,10 @@ def interpolate_in_mesh(x_val, y_val, element_idx, EToV, X, Y, U):
     t -= 1
     x_r, x_s, x_t = X[r], X[s], X[t]
     y_r, y_s, y_t = Y[r], Y[s], Y[t]
-    elements_matrix = np.array([[x_r, y_r, 1],
-                                [x_s, y_s, 1],
-                                [x_t, y_t, 1]])
-    U_vector = np.array([U[r], U[s], U[t]])
-    plane = solve_elements_plane(elements_matrix, U_vector)
-    plane2 = solve_elements_plane2(x_r, x_s,x_t, y_r, y_s, y_t, U[r], U[s], U[t])
-    u_hat = np.array([x_val, y_val, 1]).dot(plane)
-
+    plane = solve_elements_plane(x_r, x_s, x_t, y_r, y_s, y_t, U[r], U[s], U[t])
+    u_hat = eval_u_on_plane(plane, x_val, y_val)
+    # u = U_true(x_val, y_val)
+    # diff = np.abs(u_hat-u)
     return u_hat
 
 
@@ -87,16 +89,16 @@ def interpolate_in_2d(EToV, U, X, Y, X_disp, Y_disp):
     return U_hat
 
 
-def compute_triangle_error(triangle, plane_params1):
+def compute_triangle_error(triangle, common_plane, D):
     (x_c, y_c, u_c), (x_1, y_1, u_1), (x_2, y_2, u_2) = triangle
     # Find plane P1
-    elements_matrix = np.array([[x_1, y_1, 1],
-                                [x_2, y_2, 1],
-                                [x_c, y_c, 1]])
-    U_vector = np.array([u_1, u_2, u_c])
+    plane = solve_elements_plane(x_1, x_2, x_c, y_1, y_2, y_c, u_1, u_2, u_c)
+    A1, A2, A3, A4 = common_plane  # lower plane: U1(x, y) = (-A1*x - A2*y - A4) / A3
+    A5, A6, A7, A8 = plane  # upper plane: U2(x, y) = (-A5*x - A6*y - A8) / A7
 
-    plane_params2 = solve_elements_plane(elements_matrix, U_vector)
-    # print("Now we have all we need to compute the integrals")
+    integral1 = integration(common_plane, plane, )
+    integral2 = integration(common_plane, plane, )
+    result = integral1 + integral2
     return np.random.rand()
 
 
@@ -137,55 +139,52 @@ def compute_error(element_idx, EToV, X, Y, U_function):
     x_c = (x_r + x_s + x_t) / 3  # Point that splits currently analysed mesh into 3 parts (smaller triangles)
     y_c = (y_r + y_s + y_t) / 3
 
-    U_r = U_function(x_r, y_r)
-    U_s = U_function(x_s, y_s)
-    U_t = U_function(x_t, y_t)
-    U_c = U_function(x_c, y_c)  # This should be replaced with FEM once we have it
+    u_r = U_function(x_r, y_r)
+    u_s = U_function(x_s, y_s)
+    u_t = U_function(x_t, y_t)
+    u_c = U_function(x_c, y_c)  # This should be replaced with FEM once we have it
 
-    R = (x_r, y_r, U_r)
-    S = (x_s, y_s, U_s)
-    T = (x_t, y_t, U_t)
-    C = (x_c, y_c, U_c)
-
-    triangles = [(C, R, S), (C, S, T), (C, T, R)]
-    elements_matrix = np.array([[x_r, y_r, 1],
-                                [x_s, y_s, 1],
-                                [x_t, y_t, 1]])
-    U_vector = np.array([U_r, U_s, U_t])
-    common_plane_params = solve_elements_plane(elements_matrix, U_vector)
-
-    error_sum = sum(compute_triangle_error(triangle, common_plane_params) for triangle in triangles)
-    return error_sum
+    common_plane = solve_elements_plane(x_r, x_s, x_t, y_r, y_s, y_t, u_r, u_s, u_t)
+    u_d = eval_u_on_plane(common_plane, x_c, y_c)
+    diff = np.abs(u_d - u_c)
+    return diff
 
 
 def U_true(X, Y):
-    return np.exp(X) + np.exp(Y)
+    X = np.array(X)
+    Y = np.array(Y)
+    return np.exp(-100 * ((X - 0.5) ** 2 + (Y - 0.75) ** 2))
 
 
 def main():
-    elem1 = 4
-    elem2 = 3
+    elem1 = 5
+    elem2 = 4
     x0 = 0
     L1 = 1
     y0 = 0
     L2 = 1
 
-    noelem_display1 = 25
-    noelem_display2 = 25
+    noelem_display1 = 35
+    noelem_display2 = 35
 
     EToV, M = construct_element_table(elem1, elem2)
 
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-    for i in range(5):
-        errors = np.array([compute_error(e + 1, EToV, X, Y, U_true) for e in range(len(X))])
-        argmax = np.argmax(errors) + 1
-        refine_mesh(argmax, EToV, X, Y, U_true)
+    plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
 
-    X_display, Y_display = xy(x0, y0, L1, L2, noelem_display1, noelem_display2)
-    U = U_true(X, Y)
-    U_hat = interpolate_in_2d(EToV, U, X, Y, X_display, Y_display)
-    plot_surface(X_display, Y_display, noelem_display1, noelem_display2, U_hat)
-    plot_2d_grid(X, Y, EToV)
+    optimization_steps = 0
+    tol = 0.01
+    max_error = tol + 1
+    while max_error > tol:
+        # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
+        errors = np.array([compute_error(e, EToV, X, Y, U_true) for e in range(1, len(EToV) + 1)])
+        argmax = np.argmax(errors) + 1
+        max_error = errors[argmax]
+        EToV, X, Y = refine_mesh(argmax, EToV, X, Y, U_true)
+        optimization_steps += 1
+    print(optimization_steps, max_error)
+    plot_2d_grid(X, Y, EToV, text=False)
+    plot_triangulation(EToV, X, Y, U_true)
 
 
 if __name__ == '__main__':
