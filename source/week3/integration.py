@@ -17,5 +17,5 @@ def part_of_integral(plane1, plane2, A, N, x):
 def integration(plane1, plane2, A, N, integration_range: Tuple):
     int1 = part_of_integral(plane1, plane2, A, N, integration_range[1])
     int2 = part_of_integral(plane1, plane2, A, N, integration_range[0])
-    result = int1 - int2
+    result = int1 + int2
     return result
