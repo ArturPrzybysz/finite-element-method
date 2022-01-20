@@ -65,7 +65,20 @@ def refine_mesh(element_idx, EToV, X, Y, element_to_base):
 
     EToV[element_idx] = triangle1
     EToV[last_idx + 1] = triangle2
-    return EToV, X, Y, element_to_base
+    return EToV, X, Y, element_to_base, element_idx, last_idx + 1
+
+
+def compute_triangle_error(triangle, common_plane, D):
+    (x_c, y_c, u_c), (x_1, y_1, u_1), (x_2, y_2, u_2) = triangle
+    # Find plane P1
+    plane = solve_elements_plane(x_1, x_2, x_c, y_1, y_2, y_c, u_1, u_2, u_c)
+    A1, A2, A3, A4 = common_plane  # lower plane: U1(x, y) = (-A1*x - A2*y - A4) / A3
+    A5, A6, A7, A8 = plane  # upper plane: U2(x, y) = (-A5*x - A6*y - A8) / A7
+
+    integral1 = integration(common_plane, plane, )
+    integral2 = integration(common_plane, plane, )
+    result = integral1 + integral2
+    return np.random.rand()
 
 
 def compute_error(element_idx, EToV, X, Y, U_function, element_to_base):
@@ -94,8 +107,7 @@ def compute_error(element_idx, EToV, X, Y, U_function, element_to_base):
 
     common_plane = solve_elements_plane(x_r, x_s, x_t, y_r, y_s, y_t, u_r, u_s, u_t)
 
-    u_c = U_hat(X,Y, EToV)[-1]
-    #u_c = eval_u_on_plane(common_plane, x_c, y_c)  # This should be replaced with FEM once we have it
+    u_c = eval_u_on_plane(common_plane, x_c, y_c)  # This should be replaced with FEM once we have it
     u_d = U_true(x_c, y_c)
     diff = np.abs(u_d - u_c)
     return diff
@@ -164,6 +176,28 @@ def U_hat(X, Y, EToV):
     return u_hat
 
 
+def compute_global_error(element_idx, EToV, X, Y, U_true, element_to_base):
+    r, s, t = EToV[element_idx]
+    pt1, pt2 = element_to_base[element_idx]
+
+    r -= 1
+    s -= 1
+    t -= 1
+    pt1 -= 1
+    pt2 -= 1
+
+    x_r, x_s, x_t, x_1, x_2 = X[r], X[s], X[t], X[pt1], X[pt2]
+    y_r, y_s, y_t, y_1, y_2 = Y[r], Y[s], Y[t], Y[pt1], Y[pt2]
+
+    x_c = (x_1 + x_2) / 2
+    y_c = (y_1 + y_2) / 2
+
+    u_c = U_hat(X, Y, EToV)[-1]
+    u_d = U_true(x_c, y_c)
+    diff = np.abs(u_d - u_c)
+    return diff
+
+
 def main():
     elem1 = 1
     elem2 = 1
@@ -180,13 +214,23 @@ def main():
     optimization_steps = 0
     tol = 0.01
     max_error = tol + 1
+
+    max_convergence_errors = [np.max(np.array([compute_global_error(e, EToV, X, Y, U_true, element_to_base)
+                                               for e in range(1, len(EToV) + 1)]))]
+
     while max_error > tol:
         errors = np.array([compute_error(e, EToV, X, Y, U_true, element_to_base)
                            for e in range(1, len(EToV) + 1)])
         argmax = np.argmax(errors)
         max_error = errors[argmax]
         print(max_error)
-        EToV, X, Y, element_to_base = refine_mesh(argmax + 1, EToV, X, Y, element_to_base)
+        EToV, X, Y, element_to_base, last_modified1, last_modified2 = refine_mesh(argmax + 1, EToV, X, Y,
+                                                                                  element_to_base)
+
+        max_convergence_error = np.max(np.array([compute_global_error(e, EToV, X, Y, U_true, element_to_base)
+                                                 for e in range(1, len(EToV) + 1)]))
+        max_convergence_errors.append(max_convergence_error)
+        print(max_convergence_error)
         optimization_steps += 1
 
         # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
