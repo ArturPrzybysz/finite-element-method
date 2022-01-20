@@ -94,8 +94,8 @@ def compute_error(element_idx, EToV, X, Y, U_function, element_to_base):
 
     common_plane = solve_elements_plane(x_r, x_s, x_t, y_r, y_s, y_t, u_r, u_s, u_t)
 
-    # u_c = U_hat(x_c, y_c, EToV)
-    u_c = eval_u_on_plane(common_plane, x_c, y_c)  # This should be replaced with FEM once we have it
+    u_c = U_hat(X,Y, EToV)[-1]
+    #u_c = eval_u_on_plane(common_plane, x_c, y_c)  # This should be replaced with FEM once we have it
     u_d = U_true(x_c, y_c)
     diff = np.abs(u_d - u_c)
     return diff
@@ -165,8 +165,8 @@ def U_hat(X, Y, EToV):
 
 
 def main():
-    elem1 = 15
-    elem2 = 15
+    elem1 = 1
+    elem2 = 1
     L1 = 1
     L2 = 1
     x0 = 0
