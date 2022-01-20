@@ -158,8 +158,8 @@ def compute_global_error(EtoV, X, Y):
 
 
 def main():
-    elem1 = 10
-    elem2 = 10
+    elem1 = 3
+    elem2 = 3
     L1 = 1
     L2 = 1
     x0 = 0
@@ -168,54 +168,28 @@ def main():
     EToV, element_to_base, base_to_elements, edge_to_element, M = construct_element_table(elem1, elem2)
 
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-    dof = [len(X)]
+    dof=[len(X)]
     # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
 
     optimization_steps = 0
     tol = 0.01
     max_error = tol + 1
 
-    max_convergence_errors = [np.max(np.array([compute_global_error(EToV, X, Y)]))]
-    mesh = "adaptive"
-    if mesh == "adaptive":
-        # while max_error > tol:
-        for i in range(20):
-            errors = np.array([compute_error(e, EToV, X, Y, U_true, element_to_base)
-                               for e in range(1, len(EToV) + 1)])
-            argmax = np.argmax(errors)
-            max_error = errors[argmax]
-            # print(max_error)
-            EToV, X, Y, element_to_base, edge_to_element = newest_node_bisection(argmax + 1, EToV, X, Y,
-                                                                                 element_to_base,
-                                                                                 edge_to_element)
+    while max_error > tol:
+        errors = np.array([compute_error(e, EToV, X, Y, U_true, element_to_base)
+                           for e in range(1, len(EToV) + 1)])
+        argmax = np.argmax(errors)
+        max_error = errors[argmax]
+        print(max_error)
+        EToV, X, Y, element_to_base, edge_to_element = newest_node_bisection(argmax + 1, EToV, X, Y, element_to_base,
+                                                                             edge_to_element)
+        optimization_steps += 1
 
-            max_convergence_error = np.max(np.array([compute_global_error(EToV, X, Y)]))
-            max_convergence_errors.append(max_convergence_error)
-            dof.append(len(X))
-            # print(max_convergence_error)
-            optimization_steps += 1
-
-            # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
         # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
-    plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
+    print(optimization_steps)
+    plot_2d_grid(X, Y, EToV, text=False)
+    plot_triangulation_old(EToV, X, Y, U_true)
 
-    print(optimization_steps, max_convergence_error)
-    plt.xlabel("DoF")
-    plt.ylabel("Error")
-    plt.plot(dof, max_convergence_errors)
-    plt.show()
-    # plot_2d_grid(X, Y, EToV, text=False)
-    # plot_triangulation_old(EToV, X, Y, U_true)
-    # plot_triangulation(EToV, X, Y, U_true)
-
-    if mesh == "uniform":
-        for i in range(10, 50, 10):
-            elem1 = i
-            elem2 = i
-            EToV, element_to_base, base_to_elements, M = construct_element_table(elem1, elem2)
-            X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
-            max_convergence_errors = [np.max(np.array([compute_global_error(EToV, X, Y)]))]
-            print(max_convergence_errors)
 
 if __name__ == '__main__':
     main()
