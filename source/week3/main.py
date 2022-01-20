@@ -4,6 +4,7 @@ from source.week2.ex2_2a import basfun
 from source.week2.ex2_3 import compute_k_rsn, assembly
 from source.week3.construct_etov import construct_element_table
 from source.week3.integration import integration
+from source.week3.mesh_division import newest_node_bisection
 from source.week3.visualisation import plot_2d_grid, plot_triangulation, plot_triangulation_old
 from source.week3.xy import xy
 import numpy as np
@@ -31,41 +32,6 @@ def eval_u_on_plane(plane, x, y):
 
 
 c_points = dict()
-
-
-def refine_mesh(element_idx, EToV, X, Y, element_to_base):
-    r, s, t = EToV[element_idx]
-    pt1, pt2 = element_to_base[element_idx]
-
-    r -= 1
-    s -= 1
-    t -= 1
-
-    pt1 -= 1
-    pt2 -= 1
-    x_r, x_s, x_t, x_1, x_2 = X[r], X[s], X[t], X[pt1], X[pt2]
-    y_r, y_s, y_t, y_1, y_2 = Y[r], Y[s], Y[t], Y[pt1], Y[pt2]
-    x_c = (x_1 + x_2) / 2
-    y_c = (y_1 + y_2) / 2
-
-    if (x_c, y_c) in c_points:
-        c = c_points[(x_c, y_c)]
-    else:
-        X.append(x_c)
-        Y.append(y_c)
-        c = len(X)
-        c_points[(x_c, y_c)] = c
-    last_idx = len(EToV)
-
-    triangle1 = (c, t + 1, r + 1)
-    triangle2 = (c, r + 1, s + 1)
-
-    element_to_base[element_idx] = (t + 1, r + 1)
-    element_to_base[last_idx + 1] = (r + 1, s + 1)
-
-    EToV[element_idx] = triangle1
-    EToV[last_idx + 1] = triangle2
-    return EToV, X, Y, element_to_base, element_idx, last_idx + 1
 
 
 def compute_triangle_error(triangle, common_plane, D):
@@ -176,37 +142,15 @@ def U_hat(X, Y, EToV):
     return u_hat
 
 
-def compute_global_error(element_idx, EToV, X, Y, U_true, element_to_base):
-    r, s, t = EToV[element_idx]
-    pt1, pt2 = element_to_base[element_idx]
-
-    r -= 1
-    s -= 1
-    t -= 1
-    pt1 -= 1
-    pt2 -= 1
-
-    x_r, x_s, x_t, x_1, x_2 = X[r], X[s], X[t], X[pt1], X[pt2]
-    y_r, y_s, y_t, y_1, y_2 = Y[r], Y[s], Y[t], Y[pt1], Y[pt2]
-
-    x_c = (x_1 + x_2) / 2
-    y_c = (y_1 + y_2) / 2
-
-    u_c = U_hat(X, Y, EToV)[-1]
-    u_d = U_true(x_c, y_c)
-    diff = np.abs(u_d - u_c)
-    return diff
-
-
 def main():
-    elem1 = 1
-    elem2 = 1
+    elem1 = 3
+    elem2 = 3
     L1 = 1
     L2 = 1
     x0 = 0
     y0 = 0
 
-    EToV, element_to_base, base_to_elements, M = construct_element_table(elem1, elem2)
+    EToV, element_to_base, base_to_elements, edge_to_element, M = construct_element_table(elem1, elem2)
 
     X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
     plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
@@ -215,31 +159,20 @@ def main():
     tol = 0.01
     max_error = tol + 1
 
-    max_convergence_errors = [np.max(np.array([compute_global_error(e, EToV, X, Y, U_true, element_to_base)
-                                               for e in range(1, len(EToV) + 1)]))]
-
     while max_error > tol:
         errors = np.array([compute_error(e, EToV, X, Y, U_true, element_to_base)
                            for e in range(1, len(EToV) + 1)])
         argmax = np.argmax(errors)
         max_error = errors[argmax]
         print(max_error)
-        EToV, X, Y, element_to_base, last_modified1, last_modified2 = refine_mesh(argmax + 1, EToV, X, Y,
-                                                                                  element_to_base)
-
-        max_convergence_error = np.max(np.array([compute_global_error(e, EToV, X, Y, U_true, element_to_base)
-                                                 for e in range(1, len(EToV) + 1)]))
-        max_convergence_errors.append(max_convergence_error)
-        print(max_convergence_error)
+        EToV, X, Y, element_to_base, edge_to_element = newest_node_bisection(argmax + 1, EToV, X, Y, element_to_base,
+                                                                             edge_to_element)
         optimization_steps += 1
 
         # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
-    plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
 
-    print(optimization_steps, max_error)
     plot_2d_grid(X, Y, EToV, text=False)
     plot_triangulation_old(EToV, X, Y, U_true)
-    plot_triangulation(EToV, X, Y, U_true)
 
 
 if __name__ == '__main__':
