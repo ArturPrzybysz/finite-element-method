@@ -16,7 +16,7 @@ def construct_element_table(element_count1: int, element_count2: int):
             etov_dict[e] = (upper_right, upper_left, lower_right)
             etov_dict[e + 1] = (lower_left, lower_right, upper_left)
 
-            edge = tuple(sorted([upper_left, lower_right]))
+            edge = (lower_right, upper_left)
             element_to_base[e] = edge
             element_to_base[e + 1] = edge
             base_to_elements[edge].append(e)

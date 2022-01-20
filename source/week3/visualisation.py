@@ -1,19 +1,59 @@
+from collections import defaultdict
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
-def plot_triangulation(EToV, X, Y, U_true):
+def plot_triangulation_old(EToV, X, Y, U_true):
     triangles = np.array([v for v in EToV.values()]) - 1
-    # triangulation = Triangulation(X, Y, triangles)
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
     Z = U_true(X, Y)
     ax.plot_trisurf(X, Y, Z, triangles=triangles)
     plt.show()
+
+
+def plot_triangulation(EToV, X, Y, U_true):
+    all_indices = {idx: (x, y) for idx, (x, y) in enumerate(zip(X, Y))}
+    xy_to_indices = defaultdict(list)
+    for idx, (x, y) in all_indices.items():
+        xy_to_indices[(x, y)].append(idx)
+
+    old_indices_to_new = dict()
+    for indices in xy_to_indices.values():
+        for i in range(len(indices)):
+            old_indices_to_new[indices[i]] = min(indices)
+
+    new_x = dict()
+    new_y = dict()
+
+    for x, y in zip(X, Y):
+        idx = min(xy_to_indices[(x, y)])
+        new_x[idx] = x
+        new_y[idx] = y
+    new_EToV = dict()
+
+    for element_idx, vertices in EToV.items():
+        new_EToV[element_idx] = tuple([old_indices_to_new[v - 1] for v in vertices])
+
+    triangles = np.array([v for v in new_EToV.values()])
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    new_x_arr = np.zeros(max(new_x.keys()) + 1)
+    new_y_arr = np.zeros(max(new_x.keys()) + 1)
+    for idx, val in new_x.items():
+        new_x_arr[idx] = val
+    for idx, val in new_y.items():
+        new_y_arr[idx] = val
+
+    Z = U_true(new_x_arr, new_y_arr)
+    ax.plot_trisurf(new_x_arr, new_y_arr, Z, triangles=triangles)
+    plt.show()
     print()
+
 
 def plot_surface(X, Y, elem1, elem2, U_hat):
     Z_2D = U_hat.reshape((elem2 + 1, elem1 + 1))
@@ -50,7 +90,7 @@ def plot_2d_grid(VX, VY, EToV, points_to_plot=[], elements_to_plot=[], heatmap=N
     # plt.imshow(A, cmap='hot', interpolation='nearest')
     plt.gca().set_aspect('equal', adjustable='box')
 
-    plt.scatter(VX, VY, c='grey')
+    plt.scatter(VX, VY, c='grey', s =0.35)
     if text:
         for idx, (x, y) in enumerate(zip(VX, VY)):
             plt.text(x, y + 0.01, idx, c="grey")
