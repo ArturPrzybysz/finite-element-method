@@ -172,14 +172,14 @@ def main():
     # plot_2d_grid(X, Y, EToV, elements_to_plot=list(EToV.keys()))
 
     optimization_steps = 0
-    tol = 0.01
+    tol = 0.1
     max_error = tol + 1
 
     max_convergence_errors = [np.max(np.array([compute_global_error(EToV, X, Y)]))]
+    max_convergence_error = max_convergence_errors[0]
     mesh = "adaptive"
     if mesh == "adaptive":
-        # while max_error > tol:
-        for i in range(20):
+        while max_convergence_error > tol:
             errors = np.array([compute_error(e, EToV, X, Y, U_true, element_to_base)
                                for e in range(1, len(EToV) + 1)])
             argmax = np.argmax(errors)
@@ -216,6 +216,7 @@ def main():
             X, Y = xy(x0, y0, L1, L2, elem1, elem2, as_list=True)
             max_convergence_errors = [np.max(np.array([compute_global_error(EToV, X, Y)]))]
             print(max_convergence_errors)
+
 
 if __name__ == '__main__':
     main()
